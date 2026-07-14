@@ -4,6 +4,10 @@ export type Subtask = {
   done: boolean;
 };
 
+export type TaskTimeField =
+  | "startedAt"
+  | "finishedAt";
+
 export type Task = {
   id: number;
   text: string;
@@ -11,10 +15,9 @@ export type Task = {
   expanded: boolean;
   date: string;
   subtasks: Subtask[];
-
-  // Проект, к которому относится задача
   projectId: number | null;
-
-  // Тема, к которой относится задача
   topicId: number | null;
+
+  startedAt: string | null;
+  finishedAt: string | null;
 };

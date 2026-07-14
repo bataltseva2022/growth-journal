@@ -14,7 +14,10 @@ import type {
   Topic,
 } from "../types/organization";
 
-import type { Task } from "../types/task";
+import type {
+  Task,
+  TaskTimeField,
+} from "../types/task";
 
 import { parseDate } from "../utils/date";
 
@@ -46,14 +49,28 @@ type Props = {
     topicId: number | null
   ) => void;
 
-  onToggle: (id: number) => void;
+  onToggle: (
+    id: number
+  ) => void;
 
   onEditTask: (
     id: number,
     text: string
   ) => void;
 
-  onDelete: (id: number) => void;
+  onUpdateTaskTime: (
+    taskId: number,
+    field: TaskTimeField,
+    value: string | null
+  ) => void;
+
+  onClearTaskTime: (
+    taskId: number
+  ) => void;
+
+  onDelete: (
+    id: number
+  ) => void;
 
   onToggleExpand: (
     id: number
@@ -62,6 +79,12 @@ type Props = {
   onToggleSubtask: (
     taskId: number,
     subId: number
+  ) => void;
+
+  onEditSubtask: (
+    taskId: number,
+    subId: number,
+    text: string
   ) => void;
 
   onDeleteSubtask: (
@@ -102,9 +125,12 @@ export default function TaskPanel({
   onTopicChange,
   onToggle,
   onEditTask,
+  onUpdateTaskTime,
+  onClearTaskTime,
   onDelete,
   onToggleExpand,
   onToggleSubtask,
+  onEditSubtask,
   onDeleteSubtask,
   onAddSubtask,
 }: Props) {
@@ -122,154 +148,214 @@ export default function TaskPanel({
     statusFilter,
     setStatusFilter,
   ] =
-    useState<TaskStatusFilter>("all");
+    useState<TaskStatusFilter>(
+      "all"
+    );
 
-  const date = parseDate(selectedDate);
+  const date = parseDate(
+    selectedDate
+  );
 
   const title =
-    date.toLocaleDateString("ru-RU", {
-      weekday: "long",
-      day: "numeric",
-      month: "long",
-    });
-
-  const filteredTasks = useMemo(() => {
-    return tasks.filter((task) => {
-      let matchesProject = true;
-
-      if (projectFilter === "none") {
-        matchesProject =
-          task.projectId === null;
-      } else if (
-        projectFilter !== "all"
-      ) {
-        matchesProject =
-          task.projectId ===
-          Number(projectFilter);
+    date.toLocaleDateString(
+      "ru-RU",
+      {
+        weekday: "long",
+        day: "numeric",
+        month: "long",
       }
+    );
 
-      let matchesTopic = true;
+  const filteredTasks =
+    useMemo(() => {
+      return tasks.filter(
+        (task) => {
+          let matchesProject =
+            true;
 
-      if (topicFilter === "none") {
-        matchesTopic =
-          task.topicId === null;
-      } else if (
-        topicFilter !== "all"
-      ) {
-        matchesTopic =
-          task.topicId ===
-          Number(topicFilter);
-      }
+          if (
+            projectFilter ===
+            "none"
+          ) {
+            matchesProject =
+              task.projectId ===
+              null;
+          } else if (
+            projectFilter !==
+            "all"
+          ) {
+            matchesProject =
+              task.projectId ===
+              Number(
+                projectFilter
+              );
+          }
 
-      let matchesStatus = true;
+          let matchesTopic =
+            true;
 
-      if (
-        statusFilter === "active"
-      ) {
-        matchesStatus = !task.done;
-      } else if (
-        statusFilter === "completed"
-      ) {
-        matchesStatus = task.done;
-      }
+          if (
+            topicFilter ===
+            "none"
+          ) {
+            matchesTopic =
+              task.topicId ===
+              null;
+          } else if (
+            topicFilter !==
+            "all"
+          ) {
+            matchesTopic =
+              task.topicId ===
+              Number(
+                topicFilter
+              );
+          }
 
-      return (
-        matchesProject &&
-        matchesTopic &&
-        matchesStatus
+          let matchesStatus =
+            true;
+
+          if (
+            statusFilter ===
+            "active"
+          ) {
+            matchesStatus =
+              !task.done;
+          } else if (
+            statusFilter ===
+            "completed"
+          ) {
+            matchesStatus =
+              task.done;
+          }
+
+          return (
+            matchesProject &&
+            matchesTopic &&
+            matchesStatus
+          );
+        }
       );
-    });
-  }, [
-    tasks,
-    projectFilter,
-    topicFilter,
-    statusFilter,
-  ]);
+    }, [
+      tasks,
+      projectFilter,
+      topicFilter,
+      statusFilter,
+    ]);
 
-  const taskGroups = useMemo(() => {
-    const groups =
-      new Map<string, TaskGroup>();
+  const taskGroups =
+    useMemo(() => {
+      const groups =
+        new Map<
+          string,
+          TaskGroup
+        >();
 
-    filteredTasks.forEach((task) => {
-      const project = projects.find(
-        (item) =>
-          item.id === task.projectId
+      filteredTasks.forEach(
+        (task) => {
+          const project =
+            projects.find(
+              (item) =>
+                item.id ===
+                task.projectId
+            );
+
+          const topic =
+            topics.find(
+              (item) =>
+                item.id ===
+                task.topicId
+            );
+
+          const projectKey =
+            task.projectId ===
+            null
+              ? "no-project"
+              : String(
+                  task.projectId
+                );
+
+          const topicKey =
+            task.topicId ===
+            null
+              ? "no-topic"
+              : String(
+                  task.topicId
+                );
+
+          const groupKey =
+            `${projectKey}-${topicKey}`;
+
+          const existingGroup =
+            groups.get(groupKey);
+
+          if (existingGroup) {
+            existingGroup.tasks.push(
+              task
+            );
+
+            return;
+          }
+
+          groups.set(groupKey, {
+            key: groupKey,
+
+            projectName:
+              project?.name ??
+              "Без проекта",
+
+            projectColor:
+              project?.color ??
+              null,
+
+            topicName:
+              topic?.name ??
+              "Без темы",
+
+            topicColor:
+              topic?.color ??
+              null,
+
+            tasks: [task],
+          });
+        }
       );
 
-      const topic = topics.find(
-        (item) =>
-          item.id === task.topicId
+      return Array.from(
+        groups.values()
+      ).sort(
+        (first, second) => {
+          const projectComparison =
+            first.projectName.localeCompare(
+              second.projectName,
+              "ru"
+            );
+
+          if (
+            projectComparison !==
+            0
+          ) {
+            return projectComparison;
+          }
+
+          return first.topicName.localeCompare(
+            second.topicName,
+            "ru"
+          );
+        }
       );
-
-      const projectKey =
-        task.projectId === null
-          ? "no-project"
-          : String(task.projectId);
-
-      const topicKey =
-        task.topicId === null
-          ? "no-topic"
-          : String(task.topicId);
-
-      const groupKey =
-        `${projectKey}-${topicKey}`;
-
-      const existingGroup =
-        groups.get(groupKey);
-
-      if (existingGroup) {
-        existingGroup.tasks.push(task);
-        return;
-      }
-
-      groups.set(groupKey, {
-        key: groupKey,
-
-        projectName:
-          project?.name ??
-          "Без проекта",
-
-        projectColor:
-          project?.color ?? null,
-
-        topicName:
-          topic?.name ?? "Без темы",
-
-        topicColor:
-          topic?.color ?? null,
-
-        tasks: [task],
-      });
-    });
-
-    return Array.from(
-      groups.values()
-    ).sort((first, second) => {
-      const projectComparison =
-        first.projectName.localeCompare(
-          second.projectName,
-          "ru"
-        );
-
-      if (projectComparison !== 0) {
-        return projectComparison;
-      }
-
-      return first.topicName.localeCompare(
-        second.topicName,
-        "ru"
-      );
-    });
-  }, [
-    filteredTasks,
-    projects,
-    topics,
-  ]);
+    }, [
+      filteredTasks,
+      projects,
+      topics,
+    ]);
 
   function handleInputKeyDown(
     event: KeyboardEvent<HTMLInputElement>
   ) {
-    if (event.key === "Enter") {
+    if (
+      event.key === "Enter"
+    ) {
       event.preventDefault();
       onAddTask();
     }
@@ -419,7 +505,8 @@ export default function TaskPanel({
                 focus:ring-pink-100
               "
               value={
-                selectedProjectId ?? ""
+                selectedProjectId ??
+                ""
               }
               onChange={(event) => {
                 const value =
@@ -439,8 +526,12 @@ export default function TaskPanel({
               {projects.map(
                 (project) => (
                   <option
-                    key={project.id}
-                    value={project.id}
+                    key={
+                      project.id
+                    }
+                    value={
+                      project.id
+                    }
                   >
                     {project.name}
                   </option>
@@ -479,7 +570,8 @@ export default function TaskPanel({
                 focus:ring-violet-100
               "
               value={
-                selectedTopicId ?? ""
+                selectedTopicId ??
+                ""
               }
               onChange={(event) => {
                 const value =
@@ -496,14 +588,16 @@ export default function TaskPanel({
                 Без темы
               </option>
 
-              {topics.map((topic) => (
-                <option
-                  key={topic.id}
-                  value={topic.id}
-                >
-                  {topic.name}
-                </option>
-              ))}
+              {topics.map(
+                (topic) => (
+                  <option
+                    key={topic.id}
+                    value={topic.id}
+                  >
+                    {topic.name}
+                  </option>
+                )
+              )}
             </select>
           </label>
         </div>
@@ -515,8 +609,12 @@ export default function TaskPanel({
         projectFilter={
           projectFilter
         }
-        topicFilter={topicFilter}
-        statusFilter={statusFilter}
+        topicFilter={
+          topicFilter
+        }
+        statusFilter={
+          statusFilter
+        }
         onProjectFilterChange={
           setProjectFilter
         }
@@ -615,7 +713,9 @@ export default function TaskPanel({
 
             <button
               type="button"
-              onClick={resetFilters}
+              onClick={
+                resetFilters
+              }
               className="
                 mt-3
                 rounded-xl
@@ -632,122 +732,139 @@ export default function TaskPanel({
             </button>
           </div>
         ) : (
-          taskGroups.map((group) => (
-            <section key={group.key}>
-              <div
-                className="
-                  mb-2
-                  flex
-                  flex-wrap
-                  items-center
-                  gap-2
-                "
+          taskGroups.map(
+            (group) => (
+              <section
+                key={group.key}
               >
                 <div
                   className="
+                    mb-2
                     flex
+                    flex-wrap
                     items-center
                     gap-2
-                    rounded-full
-                    bg-white/90
-                    px-3
-                    py-1
-                    text-xs
-                    font-semibold
-                    text-gray-700
-                    shadow-sm
                   "
                 >
+                  <div
+                    className="
+                      flex
+                      items-center
+                      gap-2
+                      rounded-full
+                      bg-white/90
+                      px-3
+                      py-1
+                      text-xs
+                      font-semibold
+                      text-gray-700
+                      shadow-sm
+                    "
+                  >
+                    <span
+                      className="
+                        h-2.5
+                        w-2.5
+                        rounded-full
+                      "
+                      style={{
+                        backgroundColor:
+                          group.projectColor ??
+                          "#d1d5db",
+                      }}
+                    />
+
+                    {group.projectName}
+                  </div>
+
+                  <div
+                    className="
+                      flex
+                      items-center
+                      gap-2
+                      rounded-full
+                      bg-white/90
+                      px-3
+                      py-1
+                      text-xs
+                      font-medium
+                      text-gray-500
+                      shadow-sm
+                    "
+                  >
+                    <span
+                      className="
+                        h-2.5
+                        w-2.5
+                        rounded-full
+                      "
+                      style={{
+                        backgroundColor:
+                          group.topicColor ??
+                          "#d1d5db",
+                      }}
+                    />
+
+                    {group.topicName}
+                  </div>
+
                   <span
                     className="
-                      h-2.5
-                      w-2.5
-                      rounded-full
+                      text-xs
+                      text-gray-400
                     "
-                    style={{
-                      backgroundColor:
-                        group.projectColor ??
-                        "#d1d5db",
-                    }}
-                  />
-
-                  {group.projectName}
+                  >
+                    {group.tasks.length}
+                  </span>
                 </div>
 
                 <div
                   className="
-                    flex
-                    items-center
-                    gap-2
-                    rounded-full
-                    bg-white/90
-                    px-3
-                    py-1
-                    text-xs
-                    font-medium
-                    text-gray-500
-                    shadow-sm
+                    space-y-3
                   "
                 >
-                  <span
-                    className="
-                      h-2.5
-                      w-2.5
-                      rounded-full
-                    "
-                    style={{
-                      backgroundColor:
-                        group.topicColor ??
-                        "#d1d5db",
-                    }}
-                  />
-
-                  {group.topicName}
+                  {group.tasks.map(
+                    (task) => (
+                      <TaskItem
+                        key={task.id}
+                        task={task}
+                        onToggle={
+                          onToggle
+                        }
+                        onEditTask={
+                          onEditTask
+                        }
+                        onUpdateTaskTime={
+                          onUpdateTaskTime
+                        }
+                        onClearTaskTime={
+                          onClearTaskTime
+                        }
+                        onDelete={
+                          onDelete
+                        }
+                        onToggleExpand={
+                          onToggleExpand
+                        }
+                        onToggleSubtask={
+                          onToggleSubtask
+                        }
+                        onEditSubtask={
+                          onEditSubtask
+                        }
+                        onDeleteSubtask={
+                          onDeleteSubtask
+                        }
+                        onAddSubtask={
+                          onAddSubtask
+                        }
+                      />
+                    )
+                  )}
                 </div>
-
-                <span
-                  className="
-                    text-xs
-                    text-gray-400
-                  "
-                >
-                  {group.tasks.length}
-                </span>
-              </div>
-
-              <div className="space-y-3">
-                {group.tasks.map(
-                  (task) => (
-                    <TaskItem
-                      key={task.id}
-                      task={task}
-                      onToggle={
-                        onToggle
-                      }
-                      onEditTask={
-                        onEditTask
-                      }
-                      onDelete={
-                        onDelete
-                      }
-                      onToggleExpand={
-                        onToggleExpand
-                      }
-                      onToggleSubtask={
-                        onToggleSubtask
-                      }
-                      onDeleteSubtask={
-                        onDeleteSubtask
-                      }
-                      onAddSubtask={
-                        onAddSubtask
-                      }
-                    />
-                  )
-                )}
-              </div>
-            </section>
-          ))
+              </section>
+            )
+          )
         )}
       </div>
     </div>

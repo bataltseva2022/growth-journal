@@ -1,13 +1,21 @@
-import { useEffect, useState } from "react";
-import type { Task } from "../types/task";
+import {
+  useEffect,
+  useState,
+} from "react";
+
+import type {
+  Task,
+  TaskTimeField,
+} from "../types/task";
 
 const TASKS_STORAGE_KEY = "tasks";
 
 function loadTasks(): Task[] {
   try {
-    const savedTasks = localStorage.getItem(
-      TASKS_STORAGE_KEY
-    );
+    const savedTasks =
+      localStorage.getItem(
+        TASKS_STORAGE_KEY
+      );
 
     if (!savedTasks) {
       return [];
@@ -35,7 +43,8 @@ function loadTasks(): Task[] {
             ? savedTask.text
             : "",
 
-        done: savedTask.done ?? false,
+        done:
+          savedTask.done ?? false,
 
         expanded:
           savedTask.expanded ?? false,
@@ -62,6 +71,18 @@ function loadTasks(): Task[] {
           "number"
             ? savedTask.topicId
             : null,
+
+        startedAt:
+          typeof savedTask.startedAt ===
+          "string"
+            ? savedTask.startedAt
+            : null,
+
+        finishedAt:
+          typeof savedTask.finishedAt ===
+          "string"
+            ? savedTask.finishedAt
+            : null,
       };
     });
   } catch (error) {
@@ -72,6 +93,21 @@ function loadTasks(): Task[] {
 
     return [];
   }
+}
+
+function normalizeTimeValue(
+  value: string | null
+): string | null {
+  if (!value) {
+    return null;
+  }
+
+  const isValidTime =
+    /^([01]\d|2[0-3]):[0-5]\d$/.test(
+      value
+    );
+
+  return isValidTime ? value : null;
 }
 
 export default function useTasks() {
@@ -113,6 +149,8 @@ export default function useTasks() {
       subtasks: [],
       projectId,
       topicId,
+      startedAt: null,
+      finishedAt: null,
     };
 
     setTasks((currentTasks) => [
@@ -125,7 +163,8 @@ export default function useTasks() {
     taskId: number,
     newText: string
   ) {
-    const trimmedText = newText.trim();
+    const trimmedText =
+      newText.trim();
 
     if (!trimmedText) {
       return;
@@ -143,7 +182,45 @@ export default function useTasks() {
     );
   }
 
-  function toggleTask(taskId: number) {
+  function updateTaskTime(
+    taskId: number,
+    field: TaskTimeField,
+    value: string | null
+  ) {
+    const normalizedValue =
+      normalizeTimeValue(value);
+
+    setTasks((currentTasks) =>
+      currentTasks.map((task) =>
+        task.id === taskId
+          ? {
+              ...task,
+              [field]: normalizedValue,
+            }
+          : task
+      )
+    );
+  }
+
+  function clearTaskTime(
+    taskId: number
+  ) {
+    setTasks((currentTasks) =>
+      currentTasks.map((task) =>
+        task.id === taskId
+          ? {
+              ...task,
+              startedAt: null,
+              finishedAt: null,
+            }
+          : task
+      )
+    );
+  }
+
+  function toggleTask(
+    taskId: number
+  ) {
     setTasks((currentTasks) =>
       currentTasks.map((task) =>
         task.id === taskId
@@ -156,21 +233,27 @@ export default function useTasks() {
     );
   }
 
-  function deleteTask(taskId: number) {
+  function deleteTask(
+    taskId: number
+  ) {
     setTasks((currentTasks) =>
       currentTasks.filter(
-        (task) => task.id !== taskId
+        (task) =>
+          task.id !== taskId
       )
     );
   }
 
-  function toggleExpand(taskId: number) {
+  function toggleExpand(
+    taskId: number
+  ) {
     setTasks((currentTasks) =>
       currentTasks.map((task) =>
         task.id === taskId
           ? {
               ...task,
-              expanded: !task.expanded,
+              expanded:
+                !task.expanded,
             }
           : task
       )
@@ -259,7 +342,8 @@ export default function useTasks() {
     taskId: number,
     text: string
   ) {
-    const trimmedText = text.trim();
+    const trimmedText =
+      text.trim();
 
     if (!trimmedText) {
       return;
@@ -286,6 +370,40 @@ export default function useTasks() {
     );
   }
 
+  function editSubtask(
+    taskId: number,
+    subtaskId: number,
+    newText: string
+  ) {
+    const trimmedText =
+      newText.trim();
+
+    if (!trimmedText) {
+      return;
+    }
+
+    setTasks((currentTasks) =>
+      currentTasks.map((task) =>
+        task.id === taskId
+          ? {
+              ...task,
+              subtasks:
+                task.subtasks.map(
+                  (subtask) =>
+                    subtask.id ===
+                    subtaskId
+                      ? {
+                          ...subtask,
+                          text: trimmedText,
+                        }
+                      : subtask
+                ),
+            }
+          : task
+      )
+    );
+  }
+
   function toggleSubtask(
     taskId: number,
     subtaskId: number
@@ -302,7 +420,8 @@ export default function useTasks() {
                     subtaskId
                       ? {
                           ...subtask,
-                          done: !subtask.done,
+                          done:
+                            !subtask.done,
                         }
                       : subtask
                 ),
@@ -333,9 +452,12 @@ export default function useTasks() {
     );
   }
 
-  function getTasksByDate(date: string) {
+  function getTasksByDate(
+    date: string
+  ) {
     return tasks.filter(
-      (task) => task.date === date
+      (task) =>
+        task.date === date
     );
   }
 
@@ -344,7 +466,8 @@ export default function useTasks() {
   ) {
     return tasks.filter(
       (task) =>
-        task.projectId === projectId
+        task.projectId ===
+        projectId
     );
   }
 
@@ -352,7 +475,8 @@ export default function useTasks() {
     topicId: number
   ) {
     return tasks.filter(
-      (task) => task.topicId === topicId
+      (task) =>
+        task.topicId === topicId
     );
   }
 
@@ -360,6 +484,8 @@ export default function useTasks() {
     tasks,
     addTask,
     editTask,
+    updateTaskTime,
+    clearTaskTime,
     toggleTask,
     deleteTask,
     toggleExpand,
@@ -369,6 +495,7 @@ export default function useTasks() {
     clearProjectFromTasks,
     clearTopicFromTasks,
     addSubtask,
+    editSubtask,
     toggleSubtask,
     deleteSubtask,
     getTasksByDate,

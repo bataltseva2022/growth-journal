@@ -21,7 +21,9 @@ import useReflections from "./hooks/useReflections";
 import useTasks from "./hooks/useTasks";
 import useTheme from "./hooks/useTheme";
 
-import { getToday } from "./utils/date";
+import {
+  getToday,
+} from "./utils/date";
 
 import "./styles/theme.css";
 
@@ -74,25 +76,36 @@ export default function App() {
     activeTab,
     setActiveTab,
   ] =
-    useState<AppTab>(getInitialTab);
+    useState<AppTab>(
+      getInitialTab
+    );
 
   const [
     selectedDate,
     setSelectedDate,
-  ] = useState(getToday());
+  ] =
+    useState(getToday());
 
-  const [taskText, setTaskText] =
-    useState("");
+  const [
+    taskText,
+    setTaskText,
+  ] = useState("");
 
   const [
     selectedProjectId,
     setSelectedProjectId,
-  ] = useState<number | null>(null);
+  ] =
+    useState<number | null>(
+      null
+    );
 
   const [
     selectedTopicId,
     setSelectedTopicId,
-  ] = useState<number | null>(null);
+  ] =
+    useState<number | null>(
+      null
+    );
 
   const {
     theme,
@@ -106,6 +119,8 @@ export default function App() {
     tasks,
     addTask,
     editTask,
+    updateTaskTime,
+    clearTaskTime,
     toggleTask,
     deleteTask,
     toggleExpand,
@@ -113,6 +128,7 @@ export default function App() {
     clearProjectFromTasks,
     clearTopicFromTasks,
     addSubtask,
+    editSubtask,
     toggleSubtask,
     deleteSubtask,
     getTasksByDate,
@@ -149,10 +165,14 @@ export default function App() {
   }, [activeTab]);
 
   const selectedDateTasks =
-    getTasksByDate(selectedDate);
+    getTasksByDate(
+      selectedDate
+    );
 
   const selectedReflection =
-    getReflectionByDate(selectedDate);
+    getReflectionByDate(
+      selectedDate
+    );
 
   function handleAddTask() {
     const trimmedText =
@@ -175,26 +195,38 @@ export default function App() {
   function handleDeleteProject(
     projectId: number
   ) {
-    clearProjectFromTasks(projectId);
+    clearProjectFromTasks(
+      projectId
+    );
+
     deleteProject(projectId);
 
     if (
-      selectedProjectId === projectId
+      selectedProjectId ===
+      projectId
     ) {
-      setSelectedProjectId(null);
+      setSelectedProjectId(
+        null
+      );
     }
   }
 
   function handleDeleteTopic(
     topicId: number
   ) {
-    clearTopicFromTasks(topicId);
+    clearTopicFromTasks(
+      topicId
+    );
+
     deleteTopic(topicId);
 
     if (
-      selectedTopicId === topicId
+      selectedTopicId ===
+      topicId
     ) {
-      setSelectedTopicId(null);
+      setSelectedTopicId(
+        null
+      );
     }
   }
 
@@ -203,7 +235,9 @@ export default function App() {
       <>
         <PeriodStats
           tasks={tasks}
-          selectedDate={selectedDate}
+          selectedDate={
+            selectedDate
+          }
         />
 
         <section
@@ -216,7 +250,9 @@ export default function App() {
           "
         >
           <TaskPanel
-            selectedDate={selectedDate}
+            selectedDate={
+              selectedDate
+            }
             dayIcon={
               currentTheme.dayIcon
             }
@@ -230,7 +266,9 @@ export default function App() {
             tasks={
               selectedDateTasks
             }
-            projects={projects}
+            projects={
+              projects
+            }
             topics={topics}
             selectedProjectId={
               selectedProjectId
@@ -244,14 +282,29 @@ export default function App() {
             onTopicChange={
               setSelectedTopicId
             }
-            onToggle={toggleTask}
-            onEditTask={editTask}
-            onDelete={deleteTask}
+            onToggle={
+              toggleTask
+            }
+            onEditTask={
+              editTask
+            }
+            onUpdateTaskTime={
+              updateTaskTime
+            }
+            onClearTaskTime={
+              clearTaskTime
+            }
+            onDelete={
+              deleteTask
+            }
             onToggleExpand={
               toggleExpand
             }
             onToggleSubtask={
               toggleSubtask
+            }
+            onEditSubtask={
+              editSubtask
             }
             onDeleteSubtask={
               deleteSubtask
@@ -294,7 +347,9 @@ export default function App() {
           sm:p-6
         "
       >
-        <div className="mb-5">
+        <div
+          className="mb-5"
+        >
           <h2
             className="
               text-2xl
@@ -312,9 +367,9 @@ export default function App() {
               text-gray-500
             "
           >
-            Перетаскивай задачи между
-            днями и следи за прогрессом
-            недели
+            Перетаскивай задачи
+            между днями и следи
+            за прогрессом недели
           </p>
         </div>
 
@@ -326,7 +381,9 @@ export default function App() {
           dayIcon={
             currentTheme.dayIcon
           }
-          onMoveTask={moveTask}
+          onMoveTask={
+            moveTask
+          }
         />
       </section>
     );
@@ -334,7 +391,11 @@ export default function App() {
 
   function renderCalendarTab() {
     return (
-      <section className="space-y-6">
+      <section
+        className="
+          space-y-6
+        "
+      >
         <div
           className="
             rounded-3xl
@@ -351,7 +412,9 @@ export default function App() {
               text-gray-800
             "
           >
-            {currentTheme.calendarIcon}{" "}
+            {
+              currentTheme.calendarIcon
+            }{" "}
             Календарь
           </h2>
 
@@ -362,8 +425,9 @@ export default function App() {
               text-gray-500
             "
           >
-            Выбери день, чтобы посмотреть
-            его задачи и статистику
+            Выбери день, чтобы
+            посмотреть его задачи
+            и статистику
           </p>
         </div>
 
@@ -392,7 +456,11 @@ export default function App() {
             }
           />
 
-          <div className="space-y-6">
+          <div
+            className="
+              space-y-6
+            "
+          >
             <PeriodStats
               tasks={tasks}
               selectedDate={
@@ -416,7 +484,9 @@ export default function App() {
                   text-gray-800
                 "
               >
-                {currentTheme.dayIcon}{" "}
+                {
+                  currentTheme.dayIcon
+                }{" "}
                 Выбранный день
               </h3>
 
@@ -427,17 +497,20 @@ export default function App() {
                   text-gray-500
                 "
               >
-                После выбора даты перейди
-                во вкладку «Сегодня»,
-                чтобы добавить или
-                отредактировать задачи
-                этого дня.
+                После выбора даты
+                перейди во вкладку
+                «Сегодня», чтобы
+                добавить или
+                отредактировать
+                задачи этого дня.
               </p>
 
               <button
                 type="button"
                 onClick={() =>
-                  setActiveTab("today")
+                  setActiveTab(
+                    "today"
+                  )
                 }
                 className="
                   mt-4
@@ -465,7 +538,11 @@ export default function App() {
 
   function renderProjectsTab() {
     return (
-      <section className="space-y-6">
+      <section
+        className="
+          space-y-6
+        "
+      >
         <div
           className="
             rounded-3xl
@@ -492,20 +569,26 @@ export default function App() {
               text-gray-500
             "
           >
-            Создавай категории, чтобы
-            разделять рабочие, личные и
-            другие задачи
+            Создавай категории,
+            чтобы разделять рабочие,
+            личные и другие задачи
           </p>
         </div>
 
         <OrganizationPanel
-          projects={projects}
+          projects={
+            projects
+          }
           topics={topics}
-          onAddProject={addProject}
+          onAddProject={
+            addProject
+          }
           onDeleteProject={
             handleDeleteProject
           }
-          onAddTopic={addTopic}
+          onAddTopic={
+            addTopic
+          }
           onDeleteTopic={
             handleDeleteTopic
           }
@@ -516,7 +599,11 @@ export default function App() {
 
   function renderReflectionTab() {
     return (
-      <section className="space-y-6">
+      <section
+        className="
+          space-y-6
+        "
+      >
         <div
           className="
             grid
@@ -544,7 +631,9 @@ export default function App() {
                 value
               )
             }
-            onMoodChange={(mood) =>
+            onMoodChange={(
+              mood
+            ) =>
               setReflectionMood(
                 selectedDate,
                 mood
@@ -557,7 +646,11 @@ export default function App() {
             }
           />
 
-          <div className="space-y-6">
+          <div
+            className="
+              space-y-6
+            "
+          >
             <Calendar
               tasks={tasks}
               selectedDate={
@@ -600,9 +693,10 @@ export default function App() {
                   text-gray-500
                 "
               >
-                Выбирай дату в календаре
-                и сохраняй настроение,
-                успехи, сложности и мысли
+                Выбирай дату в
+                календаре и сохраняй
+                настроение, успехи,
+                сложности и мысли
                 об улучшениях.
               </p>
             </div>
@@ -614,7 +708,11 @@ export default function App() {
 
   function renderSettingsTab() {
     return (
-      <section className="space-y-6">
+      <section
+        className="
+          space-y-6
+        "
+      >
         <div
           className="
             rounded-3xl
@@ -641,8 +739,9 @@ export default function App() {
               text-gray-500
             "
           >
-            Выбирай оформление и сохраняй
-            резервные копии данных
+            Выбирай оформление и
+            сохраняй резервные
+            копии данных
           </p>
         </div>
 
@@ -657,7 +756,9 @@ export default function App() {
             backdrop-blur-md
           "
         >
-          <div className="mb-4">
+          <div
+            className="mb-4"
+          >
             <h3
               className="
                 text-lg
@@ -676,7 +777,9 @@ export default function App() {
               "
             >
               Текущая тема:{" "}
-              {currentTheme.name}
+              {
+                currentTheme.name
+              }
             </p>
           </div>
 
@@ -766,8 +869,10 @@ export default function App() {
                 text-gray-800
               "
             >
-              {currentTheme.emoji} Мой
-              планировщик
+              {
+                currentTheme.emoji
+              }{" "}
+              Мой планировщик
             </h1>
 
             <p
@@ -778,9 +883,10 @@ export default function App() {
                 text-gray-500
               "
             >
-              Планируй задачи, наблюдай за
-              прогрессом и сохраняй мысли
-              о каждом дне
+              Планируй задачи,
+              наблюдай за прогрессом
+              и сохраняй мысли о
+              каждом дне
             </p>
           </div>
 
@@ -797,13 +903,19 @@ export default function App() {
               shadow-sm
             "
           >
-            {currentTheme.emoji}{" "}
-            {currentTheme.name}
+            {
+              currentTheme.emoji
+            }{" "}
+            {
+              currentTheme.name
+            }
           </div>
         </header>
 
         <AppNavigation
-          activeTab={activeTab}
+          activeTab={
+            activeTab
+          }
           onTabChange={
             setActiveTab
           }
