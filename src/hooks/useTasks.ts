@@ -5,20 +5,24 @@ const TASKS_STORAGE_KEY = "tasks";
 
 function loadTasks(): Task[] {
   try {
-    const savedTasks = localStorage.getItem(TASKS_STORAGE_KEY);
+    const savedTasks = localStorage.getItem(
+      TASKS_STORAGE_KEY
+    );
 
     if (!savedTasks) {
       return [];
     }
 
-    const parsedTasks: unknown = JSON.parse(savedTasks);
+    const parsedTasks: unknown =
+      JSON.parse(savedTasks);
 
     if (!Array.isArray(parsedTasks)) {
       return [];
     }
 
     return parsedTasks.map((task) => {
-      const savedTask = task as Partial<Task>;
+      const savedTask =
+        task as Partial<Task>;
 
       return {
         id:
@@ -33,24 +37,29 @@ function loadTasks(): Task[] {
 
         done: savedTask.done ?? false,
 
-        expanded: savedTask.expanded ?? false,
+        expanded:
+          savedTask.expanded ?? false,
 
         date:
           typeof savedTask.date === "string"
             ? savedTask.date
             : "",
 
-        subtasks: Array.isArray(savedTask.subtasks)
+        subtasks: Array.isArray(
+          savedTask.subtasks
+        )
           ? savedTask.subtasks
           : [],
 
         projectId:
-          typeof savedTask.projectId === "number"
+          typeof savedTask.projectId ===
+          "number"
             ? savedTask.projectId
             : null,
 
         topicId:
-          typeof savedTask.topicId === "number"
+          typeof savedTask.topicId ===
+          "number"
             ? savedTask.topicId
             : null,
       };
@@ -66,7 +75,8 @@ function loadTasks(): Task[] {
 }
 
 export default function useTasks() {
-  const [tasks, setTasks] = useState<Task[]>(loadTasks);
+  const [tasks, setTasks] =
+    useState<Task[]>(loadTasks);
 
   useEffect(() => {
     try {
@@ -109,6 +119,28 @@ export default function useTasks() {
       newTask,
       ...currentTasks,
     ]);
+  }
+
+  function editTask(
+    taskId: number,
+    newText: string
+  ) {
+    const trimmedText = newText.trim();
+
+    if (!trimmedText) {
+      return;
+    }
+
+    setTasks((currentTasks) =>
+      currentTasks.map((task) =>
+        task.id === taskId
+          ? {
+              ...task,
+              text: trimmedText,
+            }
+          : task
+      )
+    );
   }
 
   function toggleTask(taskId: number) {
@@ -263,15 +295,17 @@ export default function useTasks() {
         task.id === taskId
           ? {
               ...task,
-              subtasks: task.subtasks.map(
-                (subtask) =>
-                  subtask.id === subtaskId
-                    ? {
-                        ...subtask,
-                        done: !subtask.done,
-                      }
-                    : subtask
-              ),
+              subtasks:
+                task.subtasks.map(
+                  (subtask) =>
+                    subtask.id ===
+                    subtaskId
+                      ? {
+                          ...subtask,
+                          done: !subtask.done,
+                        }
+                      : subtask
+                ),
             }
           : task
       )
@@ -287,10 +321,12 @@ export default function useTasks() {
         task.id === taskId
           ? {
               ...task,
-              subtasks: task.subtasks.filter(
-                (subtask) =>
-                  subtask.id !== subtaskId
-              ),
+              subtasks:
+                task.subtasks.filter(
+                  (subtask) =>
+                    subtask.id !==
+                    subtaskId
+                ),
             }
           : task
       )
@@ -307,11 +343,14 @@ export default function useTasks() {
     projectId: number
   ) {
     return tasks.filter(
-      (task) => task.projectId === projectId
+      (task) =>
+        task.projectId === projectId
     );
   }
 
-  function getTasksByTopic(topicId: number) {
+  function getTasksByTopic(
+    topicId: number
+  ) {
     return tasks.filter(
       (task) => task.topicId === topicId
     );
@@ -320,6 +359,7 @@ export default function useTasks() {
   return {
     tasks,
     addTask,
+    editTask,
     toggleTask,
     deleteTask,
     toggleExpand,

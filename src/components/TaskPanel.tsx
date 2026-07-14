@@ -9,8 +9,13 @@ import type { TaskStatusFilter } from "./TaskFilters";
 import TaskItem from "./TaskItem";
 import TaskStats from "./TaskStats";
 
-import type { Project, Topic } from "../types/organization";
+import type {
+  Project,
+  Topic,
+} from "../types/organization";
+
 import type { Task } from "../types/task";
+
 import { parseDate } from "../utils/date";
 
 type Props = {
@@ -18,7 +23,11 @@ type Props = {
   dayIcon: string;
 
   taskText: string;
-  onTaskTextChange: (text: string) => void;
+
+  onTaskTextChange: (
+    text: string
+  ) => void;
+
   onAddTask: () => void;
 
   tasks: Task[];
@@ -29,12 +38,26 @@ type Props = {
   selectedProjectId: number | null;
   selectedTopicId: number | null;
 
-  onProjectChange: (projectId: number | null) => void;
-  onTopicChange: (topicId: number | null) => void;
+  onProjectChange: (
+    projectId: number | null
+  ) => void;
+
+  onTopicChange: (
+    topicId: number | null
+  ) => void;
 
   onToggle: (id: number) => void;
+
+  onEditTask: (
+    id: number,
+    text: string
+  ) => void;
+
   onDelete: (id: number) => void;
-  onToggleExpand: (id: number) => void;
+
+  onToggleExpand: (
+    id: number
+  ) => void;
 
   onToggleSubtask: (
     taskId: number,
@@ -78,54 +101,75 @@ export default function TaskPanel({
   onProjectChange,
   onTopicChange,
   onToggle,
+  onEditTask,
   onDelete,
   onToggleExpand,
   onToggleSubtask,
   onDeleteSubtask,
   onAddSubtask,
 }: Props) {
-  const [projectFilter, setProjectFilter] =
-    useState("all");
+  const [
+    projectFilter,
+    setProjectFilter,
+  ] = useState("all");
 
-  const [topicFilter, setTopicFilter] =
-    useState("all");
+  const [
+    topicFilter,
+    setTopicFilter,
+  ] = useState("all");
 
-  const [statusFilter, setStatusFilter] =
+  const [
+    statusFilter,
+    setStatusFilter,
+  ] =
     useState<TaskStatusFilter>("all");
 
   const date = parseDate(selectedDate);
 
-  const title = date.toLocaleDateString("ru-RU", {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-  });
+  const title =
+    date.toLocaleDateString("ru-RU", {
+      weekday: "long",
+      day: "numeric",
+      month: "long",
+    });
 
   const filteredTasks = useMemo(() => {
     return tasks.filter((task) => {
       let matchesProject = true;
 
       if (projectFilter === "none") {
-        matchesProject = task.projectId === null;
-      } else if (projectFilter !== "all") {
         matchesProject =
-          task.projectId === Number(projectFilter);
+          task.projectId === null;
+      } else if (
+        projectFilter !== "all"
+      ) {
+        matchesProject =
+          task.projectId ===
+          Number(projectFilter);
       }
 
       let matchesTopic = true;
 
       if (topicFilter === "none") {
-        matchesTopic = task.topicId === null;
-      } else if (topicFilter !== "all") {
         matchesTopic =
-          task.topicId === Number(topicFilter);
+          task.topicId === null;
+      } else if (
+        topicFilter !== "all"
+      ) {
+        matchesTopic =
+          task.topicId ===
+          Number(topicFilter);
       }
 
       let matchesStatus = true;
 
-      if (statusFilter === "active") {
+      if (
+        statusFilter === "active"
+      ) {
         matchesStatus = !task.done;
-      } else if (statusFilter === "completed") {
+      } else if (
+        statusFilter === "completed"
+      ) {
         matchesStatus = task.done;
       }
 
@@ -143,15 +187,18 @@ export default function TaskPanel({
   ]);
 
   const taskGroups = useMemo(() => {
-    const groups = new Map<string, TaskGroup>();
+    const groups =
+      new Map<string, TaskGroup>();
 
     filteredTasks.forEach((task) => {
       const project = projects.find(
-        (item) => item.id === task.projectId
+        (item) =>
+          item.id === task.projectId
       );
 
       const topic = topics.find(
-        (item) => item.id === task.topicId
+        (item) =>
+          item.id === task.topicId
       );
 
       const projectKey =
@@ -164,9 +211,11 @@ export default function TaskPanel({
           ? "no-topic"
           : String(task.topicId);
 
-      const groupKey = `${projectKey}-${topicKey}`;
+      const groupKey =
+        `${projectKey}-${topicKey}`;
 
-      const existingGroup = groups.get(groupKey);
+      const existingGroup =
+        groups.get(groupKey);
 
       if (existingGroup) {
         existingGroup.tasks.push(task);
@@ -175,38 +224,53 @@ export default function TaskPanel({
 
       groups.set(groupKey, {
         key: groupKey,
-        projectName: project?.name ?? "Без проекта",
-        projectColor: project?.color ?? null,
-        topicName: topic?.name ?? "Без темы",
-        topicColor: topic?.color ?? null,
+
+        projectName:
+          project?.name ??
+          "Без проекта",
+
+        projectColor:
+          project?.color ?? null,
+
+        topicName:
+          topic?.name ?? "Без темы",
+
+        topicColor:
+          topic?.color ?? null,
+
         tasks: [task],
       });
     });
 
-    return Array.from(groups.values()).sort(
-      (first, second) => {
-        const projectComparison =
-          first.projectName.localeCompare(
-            second.projectName,
-            "ru"
-          );
-
-        if (projectComparison !== 0) {
-          return projectComparison;
-        }
-
-        return first.topicName.localeCompare(
-          second.topicName,
+    return Array.from(
+      groups.values()
+    ).sort((first, second) => {
+      const projectComparison =
+        first.projectName.localeCompare(
+          second.projectName,
           "ru"
         );
+
+      if (projectComparison !== 0) {
+        return projectComparison;
       }
-    );
-  }, [filteredTasks, projects, topics]);
+
+      return first.topicName.localeCompare(
+        second.topicName,
+        "ru"
+      );
+    });
+  }, [
+    filteredTasks,
+    projects,
+    topics,
+  ]);
 
   function handleInputKeyDown(
     event: KeyboardEvent<HTMLInputElement>
   ) {
     if (event.key === "Enter") {
+      event.preventDefault();
       onAddTask();
     }
   }
@@ -245,13 +309,18 @@ export default function TaskPanel({
         {dayIcon} {title}
       </h2>
 
-      <p className="mb-5 text-sm text-gray-500">
+      <p
+        className="
+          mb-5
+          text-sm
+          text-gray-500
+        "
+      >
         Задачи выбранного дня
       </p>
 
       <TaskStats tasks={tasks} />
 
-      {/* Создание новой задачи */}
       <div
         className="
           mb-5
@@ -281,9 +350,13 @@ export default function TaskPanel({
             placeholder="Новая задача..."
             value={taskText}
             onChange={(event) =>
-              onTaskTextChange(event.target.value)
+              onTaskTextChange(
+                event.target.value
+              )
             }
-            onKeyDown={handleInputKeyDown}
+            onKeyDown={
+              handleInputKeyDown
+            }
           />
 
           <button
@@ -345,12 +418,17 @@ export default function TaskPanel({
                 focus:ring-2
                 focus:ring-pink-100
               "
-              value={selectedProjectId ?? ""}
+              value={
+                selectedProjectId ?? ""
+              }
               onChange={(event) => {
-                const value = event.target.value;
+                const value =
+                  event.target.value;
 
                 onProjectChange(
-                  value ? Number(value) : null
+                  value
+                    ? Number(value)
+                    : null
                 );
               }}
             >
@@ -358,14 +436,16 @@ export default function TaskPanel({
                 Без проекта
               </option>
 
-              {projects.map((project) => (
-                <option
-                  key={project.id}
-                  value={project.id}
-                >
-                  {project.name}
-                </option>
-              ))}
+              {projects.map(
+                (project) => (
+                  <option
+                    key={project.id}
+                    value={project.id}
+                  >
+                    {project.name}
+                  </option>
+                )
+              )}
             </select>
           </label>
 
@@ -398,12 +478,17 @@ export default function TaskPanel({
                 focus:ring-2
                 focus:ring-violet-100
               "
-              value={selectedTopicId ?? ""}
+              value={
+                selectedTopicId ?? ""
+              }
               onChange={(event) => {
-                const value = event.target.value;
+                const value =
+                  event.target.value;
 
                 onTopicChange(
-                  value ? Number(value) : null
+                  value
+                    ? Number(value)
+                    : null
                 );
               }}
             >
@@ -424,16 +509,23 @@ export default function TaskPanel({
         </div>
       </div>
 
-      {/* Фильтры списка */}
       <TaskFilters
         projects={projects}
         topics={topics}
-        projectFilter={projectFilter}
+        projectFilter={
+          projectFilter
+        }
         topicFilter={topicFilter}
         statusFilter={statusFilter}
-        onProjectFilterChange={setProjectFilter}
-        onTopicFilterChange={setTopicFilter}
-        onStatusFilterChange={setStatusFilter}
+        onProjectFilterChange={
+          setProjectFilter
+        }
+        onTopicFilterChange={
+          setTopicFilter
+        }
+        onStatusFilterChange={
+          setStatusFilter
+        }
         onReset={resetFilters}
       />
 
@@ -449,16 +541,18 @@ export default function TaskPanel({
         "
       >
         <span>
-          Показано: {filteredTasks.length} из{" "}
+          Показано:{" "}
+          {filteredTasks.length} из{" "}
           {tasks.length}
         </span>
 
         {filtersAreActive && (
-          <span>Фильтры включены</span>
+          <span>
+            Фильтры включены
+          </span>
         )}
       </div>
 
-      {/* Список задач */}
       <div
         className="
           max-h-[700px]
@@ -479,13 +573,21 @@ export default function TaskPanel({
               text-gray-400
             "
           >
-            <div className="mb-2 text-3xl">
+            <div
+              className="
+                mb-2
+                text-3xl
+              "
+            >
               {dayIcon}
             </div>
 
-            <p>На этот день задач пока нет</p>
+            <p>
+              На этот день задач пока нет
+            </p>
           </div>
-        ) : filteredTasks.length === 0 ? (
+        ) : filteredTasks.length ===
+          0 ? (
           <div
             className="
               rounded-2xl
@@ -497,12 +599,18 @@ export default function TaskPanel({
               text-gray-400
             "
           >
-            <div className="mb-2 text-3xl">
+            <div
+              className="
+                mb-2
+                text-3xl
+              "
+            >
               🔎
             </div>
 
             <p>
-              По выбранным фильтрам задач нет
+              По выбранным фильтрам задач
+              нет
             </p>
 
             <button
@@ -597,32 +705,46 @@ export default function TaskPanel({
                   {group.topicName}
                 </div>
 
-                <span className="text-xs text-gray-400">
+                <span
+                  className="
+                    text-xs
+                    text-gray-400
+                  "
+                >
                   {group.tasks.length}
                 </span>
               </div>
 
               <div className="space-y-3">
-                {group.tasks.map((task) => (
-                  <TaskItem
-                    key={task.id}
-                    task={task}
-                    onToggle={onToggle}
-                    onDelete={onDelete}
-                    onToggleExpand={
-                      onToggleExpand
-                    }
-                    onToggleSubtask={
-                      onToggleSubtask
-                    }
-                    onDeleteSubtask={
-                      onDeleteSubtask
-                    }
-                    onAddSubtask={
-                      onAddSubtask
-                    }
-                  />
-                ))}
+                {group.tasks.map(
+                  (task) => (
+                    <TaskItem
+                      key={task.id}
+                      task={task}
+                      onToggle={
+                        onToggle
+                      }
+                      onEditTask={
+                        onEditTask
+                      }
+                      onDelete={
+                        onDelete
+                      }
+                      onToggleExpand={
+                        onToggleExpand
+                      }
+                      onToggleSubtask={
+                        onToggleSubtask
+                      }
+                      onDeleteSubtask={
+                        onDeleteSubtask
+                      }
+                      onAddSubtask={
+                        onAddSubtask
+                      }
+                    />
+                  )
+                )}
               </div>
             </section>
           ))

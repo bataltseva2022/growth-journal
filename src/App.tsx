@@ -6,6 +6,7 @@ import {
 import AppNavigation, {
   type AppTab,
 } from "./components/AppNavigation";
+
 import BackupPanel from "./components/BackupPanel";
 import Calendar from "./components/Calendar";
 import OrganizationPanel from "./components/OrganizationPanel";
@@ -69,11 +70,16 @@ function getInitialTab(): AppTab {
 }
 
 export default function App() {
-  const [activeTab, setActiveTab] =
+  const [
+    activeTab,
+    setActiveTab,
+  ] =
     useState<AppTab>(getInitialTab);
 
-  const [selectedDate, setSelectedDate] =
-    useState(getToday());
+  const [
+    selectedDate,
+    setSelectedDate,
+  ] = useState(getToday());
 
   const [taskText, setTaskText] =
     useState("");
@@ -99,6 +105,7 @@ export default function App() {
   const {
     tasks,
     addTask,
+    editTask,
     toggleTask,
     deleteTask,
     toggleExpand,
@@ -217,8 +224,12 @@ export default function App() {
             onTaskTextChange={
               setTaskText
             }
-            onAddTask={handleAddTask}
-            tasks={selectedDateTasks}
+            onAddTask={
+              handleAddTask
+            }
+            tasks={
+              selectedDateTasks
+            }
             projects={projects}
             topics={topics}
             selectedProjectId={
@@ -234,6 +245,7 @@ export default function App() {
               setSelectedTopicId
             }
             onToggle={toggleTask}
+            onEditTask={editTask}
             onDelete={deleteTask}
             onToggleExpand={
               toggleExpand
@@ -251,7 +263,9 @@ export default function App() {
 
           <Calendar
             tasks={tasks}
-            selectedDate={selectedDate}
+            selectedDate={
+              selectedDate
+            }
             onSelectDate={
               setSelectedDate
             }
@@ -306,7 +320,9 @@ export default function App() {
 
         <WeekBoard
           tasks={tasks}
-          selectedDate={selectedDate}
+          selectedDate={
+            selectedDate
+          }
           dayIcon={
             currentTheme.dayIcon
           }
@@ -318,11 +334,7 @@ export default function App() {
 
   function renderCalendarTab() {
     return (
-      <section
-        className="
-          space-y-6
-        "
-      >
+      <section className="space-y-6">
         <div
           className="
             rounded-3xl
@@ -366,12 +378,12 @@ export default function App() {
         >
           <Calendar
             tasks={tasks}
-            selectedDate={selectedDate}
-            onSelectDate={(
-              date
-            ) => {
-              setSelectedDate(date);
-            }}
+            selectedDate={
+              selectedDate
+            }
+            onSelectDate={
+              setSelectedDate
+            }
             calendarIcon={
               currentTheme.calendarIcon
             }
@@ -453,11 +465,7 @@ export default function App() {
 
   function renderProjectsTab() {
     return (
-      <section
-        className="
-          space-y-6
-        "
-      >
+      <section className="space-y-6">
         <div
           className="
             rounded-3xl
@@ -508,11 +516,7 @@ export default function App() {
 
   function renderReflectionTab() {
     return (
-      <section
-        className="
-          space-y-6
-        "
-      >
+      <section className="space-y-6">
         <div
           className="
             grid
@@ -523,7 +527,9 @@ export default function App() {
           "
         >
           <ReflectionPanel
-            selectedDate={selectedDate}
+            selectedDate={
+              selectedDate
+            }
             reflection={
               selectedReflection
             }
@@ -608,11 +614,7 @@ export default function App() {
 
   function renderSettingsTab() {
     return (
-      <section
-        className="
-          space-y-6
-        "
-      >
+      <section className="space-y-6">
         <div
           className="
             rounded-3xl
@@ -680,7 +682,9 @@ export default function App() {
 
           <ThemeSwitcher
             theme={theme}
-            onThemeChange={setTheme}
+            onThemeChange={
+              setTheme
+            }
           />
         </section>
 
@@ -800,7 +804,9 @@ export default function App() {
 
         <AppNavigation
           activeTab={activeTab}
-          onTabChange={setActiveTab}
+          onTabChange={
+            setActiveTab
+          }
         />
 
         <div
