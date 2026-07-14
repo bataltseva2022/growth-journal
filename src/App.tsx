@@ -11,19 +11,20 @@ import BackupPanel from "./components/BackupPanel";
 import Calendar from "./components/Calendar";
 import OrganizationPanel from "./components/OrganizationPanel";
 import PeriodStats from "./components/PeriodStats";
+import Pet from "./components/Pet";
+import PetSelector from "./components/PetSelector";
 import ReflectionPanel from "./components/ReflectionPanel";
 import TaskPanel from "./components/TaskPanel";
 import ThemeSwitcher from "./components/ThemeSwitcher";
 import WeekBoard from "./components/WeekBoard";
 
 import useOrganization from "./hooks/useOrganization";
+import usePet from "./hooks/usePet";
 import useReflections from "./hooks/useReflections";
 import useTasks from "./hooks/useTasks";
 import useTheme from "./hooks/useTheme";
 
-import {
-  getToday,
-} from "./utils/date";
+import { getToday } from "./utils/date";
 
 import "./styles/theme.css";
 
@@ -83,8 +84,7 @@ export default function App() {
   const [
     selectedDate,
     setSelectedDate,
-  ] =
-    useState(getToday());
+  ] = useState(getToday());
 
   const [
     taskText,
@@ -94,18 +94,16 @@ export default function App() {
   const [
     selectedProjectId,
     setSelectedProjectId,
-  ] =
-    useState<number | null>(
-      null
-    );
+  ] = useState<number | null>(
+    null
+  );
 
   const [
     selectedTopicId,
     setSelectedTopicId,
-  ] =
-    useState<number | null>(
-      null
-    );
+  ] = useState<number | null>(
+    null
+  );
 
   const {
     theme,
@@ -114,6 +112,18 @@ export default function App() {
     themeVariables,
     currentTheme,
   } = useTheme();
+
+  const {
+    selectedPet,
+    isMinimized,
+    message,
+    isAnimating,
+    selectPet,
+    interactWithPet,
+    reactToTaskAdded,
+    reactToTaskCompleted,
+    toggleMinimized,
+  } = usePet();
 
   const {
     tasks,
@@ -190,6 +200,47 @@ export default function App() {
     );
 
     setTaskText("");
+    reactToTaskAdded();
+  }
+
+  function handleToggleTask(
+    taskId: number
+  ) {
+    const taskToToggle =
+      tasks.find(
+        (task) =>
+          task.id === taskId
+      );
+
+    if (!taskToToggle) {
+      return;
+    }
+
+    const willBeCompleted =
+      !taskToToggle.done;
+
+    if (willBeCompleted) {
+      const tasksForSameDay =
+        tasks.filter(
+          (task) =>
+            task.date ===
+            taskToToggle.date
+        );
+
+      const allTasksCompleted =
+        tasksForSameDay.length > 0 &&
+        tasksForSameDay.every(
+          (task) =>
+            task.id === taskId ||
+            task.done
+        );
+
+      reactToTaskCompleted(
+        allTasksCompleted
+      );
+    }
+
+    toggleTask(taskId);
   }
 
   function handleDeleteProject(
@@ -256,7 +307,9 @@ export default function App() {
             dayIcon={
               currentTheme.dayIcon
             }
-            taskText={taskText}
+            taskText={
+              taskText
+            }
             onTaskTextChange={
               setTaskText
             }
@@ -283,7 +336,7 @@ export default function App() {
               setSelectedTopicId
             }
             onToggle={
-              toggleTask
+              handleToggleTask
             }
             onEditTask={
               editTask
@@ -347,9 +400,7 @@ export default function App() {
           sm:p-6
         "
       >
-        <div
-          className="mb-5"
-        >
+        <div className="mb-5">
           <h2
             className="
               text-2xl
@@ -391,11 +442,7 @@ export default function App() {
 
   function renderCalendarTab() {
     return (
-      <section
-        className="
-          space-y-6
-        "
-      >
+      <section className="space-y-6">
         <div
           className="
             rounded-3xl
@@ -456,11 +503,7 @@ export default function App() {
             }
           />
 
-          <div
-            className="
-              space-y-6
-            "
-          >
+          <div className="space-y-6">
             <PeriodStats
               tasks={tasks}
               selectedDate={
@@ -538,11 +581,7 @@ export default function App() {
 
   function renderProjectsTab() {
     return (
-      <section
-        className="
-          space-y-6
-        "
-      >
+      <section className="space-y-6">
         <div
           className="
             rounded-3xl
@@ -599,11 +638,7 @@ export default function App() {
 
   function renderReflectionTab() {
     return (
-      <section
-        className="
-          space-y-6
-        "
-      >
+      <section className="space-y-6">
         <div
           className="
             grid
@@ -646,11 +681,7 @@ export default function App() {
             }
           />
 
-          <div
-            className="
-              space-y-6
-            "
-          >
+          <div className="space-y-6">
             <Calendar
               tasks={tasks}
               selectedDate={
@@ -708,11 +739,7 @@ export default function App() {
 
   function renderSettingsTab() {
     return (
-      <section
-        className="
-          space-y-6
-        "
-      >
+      <section className="space-y-6">
         <div
           className="
             rounded-3xl
@@ -739,9 +766,9 @@ export default function App() {
               text-gray-500
             "
           >
-            Выбирай оформление и
-            сохраняй резервные
-            копии данных
+            Выбирай оформление,
+            питомца и сохраняй
+            резервные копии данных
           </p>
         </div>
 
@@ -756,9 +783,7 @@ export default function App() {
             backdrop-blur-md
           "
         >
-          <div
-            className="mb-4"
-          >
+          <div className="mb-4">
             <h3
               className="
                 text-lg
@@ -787,6 +812,27 @@ export default function App() {
             theme={theme}
             onThemeChange={
               setTheme
+            }
+          />
+        </section>
+
+        <section
+          className="
+            rounded-3xl
+            border
+            border-white/60
+            bg-white/65
+            p-5
+            shadow-lg
+            backdrop-blur-md
+          "
+        >
+          <PetSelector
+            selectedPet={
+              selectedPet
+            }
+            onSelectPet={
+              selectPet
             }
           />
         </section>
@@ -930,6 +976,23 @@ export default function App() {
           {renderActiveTab()}
         </div>
       </main>
+
+      <Pet
+        petId={selectedPet}
+        message={message}
+        isAnimating={
+          isAnimating
+        }
+        isMinimized={
+          isMinimized
+        }
+        onInteract={
+          interactWithPet
+        }
+        onToggleMinimized={
+          toggleMinimized
+        }
+      />
     </div>
   );
 }
