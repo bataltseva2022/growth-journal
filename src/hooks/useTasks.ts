@@ -107,7 +107,9 @@ function normalizeTimeValue(
       value
     );
 
-  return isValidTime ? value : null;
+  return isValidTime
+    ? value
+    : null;
 }
 
 export default function useTasks() {
@@ -134,7 +136,8 @@ export default function useTasks() {
     projectId: number | null = null,
     topicId: number | null = null
   ) {
-    const trimmedText = text.trim();
+    const trimmedText =
+      text.trim();
 
     if (!trimmedText) {
       return;
@@ -182,6 +185,54 @@ export default function useTasks() {
     );
   }
 
+  function reorderTasks(
+    firstTaskId: number,
+    secondTaskId: number
+  ) {
+    setTasks((currentTasks) => {
+      const firstTaskIndex =
+        currentTasks.findIndex(
+          (task) =>
+            task.id === firstTaskId
+        );
+
+      const secondTaskIndex =
+        currentTasks.findIndex(
+          (task) =>
+            task.id === secondTaskId
+        );
+
+      if (
+        firstTaskIndex === -1 ||
+        secondTaskIndex === -1
+      ) {
+        return currentTasks;
+      }
+
+      const reorderedTasks = [
+        ...currentTasks,
+      ];
+
+      const firstTask =
+        reorderedTasks[
+          firstTaskIndex
+        ];
+
+      reorderedTasks[
+        firstTaskIndex
+      ] =
+        reorderedTasks[
+          secondTaskIndex
+        ];
+
+      reorderedTasks[
+        secondTaskIndex
+      ] = firstTask;
+
+      return reorderedTasks;
+    });
+  }
+
   function updateTaskTime(
     taskId: number,
     field: TaskTimeField,
@@ -195,7 +246,8 @@ export default function useTasks() {
         task.id === taskId
           ? {
               ...task,
-              [field]: normalizedValue,
+              [field]:
+                normalizedValue,
             }
           : task
       )
@@ -313,7 +365,8 @@ export default function useTasks() {
   ) {
     setTasks((currentTasks) =>
       currentTasks.map((task) =>
-        task.projectId === projectId
+        task.projectId ===
+        projectId
           ? {
               ...task,
               projectId: null,
@@ -394,7 +447,8 @@ export default function useTasks() {
                     subtaskId
                       ? {
                           ...subtask,
-                          text: trimmedText,
+                          text:
+                            trimmedText,
                         }
                       : subtask
                 ),
@@ -484,6 +538,7 @@ export default function useTasks() {
     tasks,
     addTask,
     editTask,
+    reorderTasks,
     updateTaskTime,
     clearTaskTime,
     toggleTask,

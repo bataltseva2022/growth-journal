@@ -1,13 +1,17 @@
 import {
   useMemo,
   type DragEvent,
+  type PointerEvent,
 } from "react";
+
 import type { Task } from "../types/task";
+
 import {
   formatDate,
   getToday,
   getWeekDays,
 } from "../utils/date";
+
 import TaskStats from "./TaskStats";
 
 type Props = {
@@ -19,6 +23,11 @@ type Props = {
     taskId: number,
     newDate: string
   ) => void;
+
+  onReorderTasks: (
+    firstTaskId: number,
+    secondTaskId: number
+  ) => void;
 };
 
 export default function WeekBoard({
@@ -26,6 +35,7 @@ export default function WeekBoard({
   selectedDate,
   dayIcon,
   onMoveTask,
+  onReorderTasks,
 }: Props) {
   const today = getToday();
 
@@ -45,7 +55,9 @@ export default function WeekBoard({
   const weekTasks = useMemo(
     () =>
       tasks.filter((task) =>
-        weekDateStrings.includes(task.date)
+        weekDateStrings.includes(
+          task.date
+        )
       ),
     [tasks, weekDateStrings]
   );
@@ -65,7 +77,9 @@ export default function WeekBoard({
     event.preventDefault();
 
     const taskId = Number(
-      event.dataTransfer.getData("taskId")
+      event.dataTransfer.getData(
+        "taskId"
+      )
     );
 
     if (!Number.isFinite(taskId)) {
@@ -73,6 +87,12 @@ export default function WeekBoard({
     }
 
     onMoveTask(taskId, date);
+  }
+
+  function stopTaskDrag(
+    event: PointerEvent<HTMLButtonElement>
+  ) {
+    event.stopPropagation();
   }
 
   return (
@@ -89,12 +109,26 @@ export default function WeekBoard({
         "
       >
         <div>
-          <h2 className="text-xl font-bold text-gray-800">
+          <h2
+            className="
+              text-xl
+              font-bold
+              text-gray-800
+            "
+          >
             {dayIcon} План на неделю
           </h2>
 
-          <p className="mt-1 text-sm text-gray-500">
-            Перетаскивай основные задачи между днями
+          <p
+            className="
+              mt-1
+              text-sm
+              text-gray-500
+            "
+          >
+            Перетаскивай задачи между
+            днями или меняй их порядок
+            кнопками
           </p>
         </div>
 
@@ -104,9 +138,17 @@ export default function WeekBoard({
         />
       </div>
 
-      <div className="grid min-w-[1120px] grid-cols-7 gap-3">
+      <div
+        className="
+          grid
+          min-w-[1120px]
+          grid-cols-7
+          gap-3
+        "
+      >
         {weekDays.map((day) => {
-          const dateStr = formatDate(day);
+          const dateStr =
+            formatDate(day);
 
           const dayTasks =
             getTasksByDate(dateStr);
@@ -122,12 +164,14 @@ export default function WeekBoard({
 
           const daySubtasks =
             dayTasks.flatMap(
-              (task) => task.subtasks
+              (task) =>
+                task.subtasks
             );
 
           const completedSubtaskCount =
             daySubtasks.filter(
-              (subtask) => subtask.done
+              (subtask) =>
+                subtask.done
             ).length;
 
           const remainingSubtaskCount =
@@ -168,15 +212,38 @@ export default function WeekBoard({
                   "move";
               }}
               onDrop={(event) =>
-                handleDrop(event, dateStr)
+                handleDrop(
+                  event,
+                  dateStr
+                )
               }
             >
-              <div className="mb-3 border-b border-pink-100 pb-3 text-center">
-                <div className="mb-1 text-base">
+              <div
+                className="
+                  mb-3
+                  border-b
+                  border-pink-100
+                  pb-3
+                  text-center
+                "
+              >
+                <div
+                  className="
+                    mb-1
+                    text-base
+                  "
+                >
                   {dayIcon}
                 </div>
 
-                <div className="text-xs font-medium uppercase text-gray-500">
+                <div
+                  className="
+                    text-xs
+                    font-medium
+                    uppercase
+                    text-gray-500
+                  "
+                >
                   {day.toLocaleDateString(
                     "ru-RU",
                     {
@@ -207,19 +274,28 @@ export default function WeekBoard({
                   {day.getDate()}
                 </div>
 
-                <div className="mt-2 space-y-1 text-[11px] text-gray-400">
+                <div
+                  className="
+                    mt-2
+                    space-y-1
+                    text-[11px]
+                    text-gray-400
+                  "
+                >
                   <div>
                     Задачи: ✅{" "}
                     {completedTaskCount}
                     {" · "}
-                    📌 {remainingTaskCount}
+                    📌{" "}
+                    {remainingTaskCount}
                   </div>
 
                   <div>
                     Подзадачи: ✅{" "}
                     {completedSubtaskCount}
                     {" · "}
-                    📌 {remainingSubtaskCount}
+                    📌{" "}
+                    {remainingSubtaskCount}
                   </div>
                 </div>
               </div>
@@ -239,115 +315,277 @@ export default function WeekBoard({
                       text-gray-400
                     "
                   >
-                    <div className="mb-1 text-base">
+                    <div
+                      className="
+                        mb-1
+                        text-base
+                      "
+                    >
                       {dayIcon}
                     </div>
 
                     Нет задач
                   </div>
                 ) : (
-                  dayTasks.map((task) => (
-                    <article
-                      key={task.id}
-                      draggable
-                      onDragStart={(event) => {
-                        event.dataTransfer.setData(
-                          "taskId",
-                          String(task.id)
-                        );
+                  dayTasks.map(
+                    (
+                      task,
+                      taskIndex
+                    ) => {
+                      const previousTask =
+                        dayTasks[
+                          taskIndex - 1
+                        ] ?? null;
 
-                        event.dataTransfer.effectAllowed =
-                          "move";
-                      }}
-                      className={`
-                        cursor-move
-                        rounded-xl
-                        border
-                        px-3
-                        py-3
-                        text-sm
-                        transition
-                        ${
-                          task.done
-                            ? "border-green-100 bg-green-50/80 text-gray-400 opacity-75"
-                            : "border-pink-100 bg-pink-100 text-gray-700 hover:bg-pink-200"
-                        }
-                      `}
-                      title="Перетащить задачу на другой день"
-                    >
-                      <div className="flex items-start gap-2">
-                        <span className="shrink-0">
-                          {task.done
-                            ? "✓"
-                            : "○"}
-                        </span>
+                      const nextTask =
+                        dayTasks[
+                          taskIndex + 1
+                        ] ?? null;
 
-                        <span
+                      return (
+                        <article
+                          key={task.id}
+                          draggable
+                          onDragStart={(
+                            event
+                          ) => {
+                            event.dataTransfer.setData(
+                              "taskId",
+                              String(
+                                task.id
+                              )
+                            );
+
+                            event.dataTransfer.effectAllowed =
+                              "move";
+                          }}
                           className={`
-                            min-w-0
-                            break-words
-                            font-medium
+                            cursor-move
+                            rounded-xl
+                            border
+                            px-3
+                            py-3
+                            text-sm
+                            transition
                             ${
                               task.done
-                                ? "line-through"
-                                : ""
+                                ? "border-green-100 bg-green-50/80 text-gray-400 opacity-75"
+                                : "border-pink-100 bg-pink-100 text-gray-700 hover:bg-pink-200"
                             }
                           `}
+                          title="Перетащить задачу на другой день"
                         >
-                          {task.text}
-                        </span>
-                      </div>
+                          <div
+                            className="
+                              flex
+                              items-start
+                              gap-2
+                            "
+                          >
+                            <span
+                              className="
+                                shrink-0
+                              "
+                            >
+                              {task.done
+                                ? "✓"
+                                : "○"}
+                            </span>
 
-                      {task.subtasks.length >
-                        0 && (
-                        <div className="mt-3 space-y-1.5 border-t border-black/5 pt-2">
-                          {task.subtasks.map(
-                            (subtask) => (
-                              <div
-                                key={
-                                  subtask.id
+                            <span
+                              className={`
+                                min-w-0
+                                flex-1
+                                break-words
+                                font-medium
+                                ${
+                                  task.done
+                                    ? "line-through"
+                                    : ""
                                 }
-                                className={`
-                                  flex
-                                  items-start
-                                  gap-1.5
-                                  rounded-lg
-                                  px-2
-                                  py-1.5
-                                  text-[11px]
-                                  ${
-                                    subtask.done
-                                      ? "bg-green-50/80 text-gray-400"
-                                      : "bg-white/60 text-gray-600"
-                                  }
-                                `}
-                              >
-                                <span className="shrink-0">
-                                  {subtask.done
-                                    ? "✓"
-                                    : "•"}
-                                </span>
+                              `}
+                            >
+                              {task.text}
+                            </span>
 
-                                <span
-                                  className={`
-                                    min-w-0
-                                    break-words
-                                    ${
-                                      subtask.done
-                                        ? "line-through"
-                                        : ""
+                            <div
+                              className="
+                                flex
+                                shrink-0
+                                flex-col
+                                gap-1
+                              "
+                            >
+                              <button
+                                type="button"
+                                draggable={
+                                  false
+                                }
+                                disabled={
+                                  previousTask ===
+                                  null
+                                }
+                                onPointerDown={
+                                  stopTaskDrag
+                                }
+                                onClick={(
+                                  event
+                                ) => {
+                                  event.stopPropagation();
+
+                                  if (
+                                    previousTask
+                                  ) {
+                                    onReorderTasks(
+                                      task.id,
+                                      previousTask.id
+                                    );
+                                  }
+                                }}
+                                className="
+                                  flex
+                                  h-6
+                                  w-6
+                                  items-center
+                                  justify-center
+                                  rounded-md
+                                  bg-white/75
+                                  text-xs
+                                  font-bold
+                                  text-gray-500
+                                  shadow-sm
+                                  transition
+                                  hover:bg-pink-50
+                                  hover:text-pink-600
+                                  disabled:cursor-not-allowed
+                                  disabled:opacity-25
+                                "
+                                aria-label="Переместить задачу выше"
+                                title="Переместить выше"
+                              >
+                                ↑
+                              </button>
+
+                              <button
+                                type="button"
+                                draggable={
+                                  false
+                                }
+                                disabled={
+                                  nextTask ===
+                                  null
+                                }
+                                onPointerDown={
+                                  stopTaskDrag
+                                }
+                                onClick={(
+                                  event
+                                ) => {
+                                  event.stopPropagation();
+
+                                  if (
+                                    nextTask
+                                  ) {
+                                    onReorderTasks(
+                                      task.id,
+                                      nextTask.id
+                                    );
+                                  }
+                                }}
+                                className="
+                                  flex
+                                  h-6
+                                  w-6
+                                  items-center
+                                  justify-center
+                                  rounded-md
+                                  bg-white/75
+                                  text-xs
+                                  font-bold
+                                  text-gray-500
+                                  shadow-sm
+                                  transition
+                                  hover:bg-pink-50
+                                  hover:text-pink-600
+                                  disabled:cursor-not-allowed
+                                  disabled:opacity-25
+                                "
+                                aria-label="Переместить задачу ниже"
+                                title="Переместить ниже"
+                              >
+                                ↓
+                              </button>
+                            </div>
+                          </div>
+
+                          {task.subtasks
+                            .length > 0 && (
+                            <div
+                              className="
+                                mt-3
+                                space-y-1.5
+                                border-t
+                                border-black/5
+                                pt-2
+                              "
+                            >
+                              {task.subtasks.map(
+                                (
+                                  subtask
+                                ) => (
+                                  <div
+                                    key={
+                                      subtask.id
                                     }
-                                  `}
-                                >
-                                  {subtask.text}
-                                </span>
-                              </div>
-                            )
+                                    className={`
+                                      flex
+                                      items-start
+                                      gap-1.5
+                                      rounded-lg
+                                      px-2
+                                      py-1.5
+                                      text-[11px]
+                                      ${
+                                        subtask.done
+                                          ? "bg-green-50/80 text-gray-400"
+                                          : "bg-white/60 text-gray-600"
+                                      }
+                                    `}
+                                  >
+                                    <span
+                                      className="
+                                        shrink-0
+                                      "
+                                    >
+                                      {subtask.done
+                                        ? "✓"
+                                        : "•"}
+                                    </span>
+
+                                    <span
+                                      className={`
+                                        min-w-0
+                                        break-words
+                                        ${
+                                          subtask.done
+                                            ? "line-through"
+                                            : ""
+                                        }
+                                      `}
+                                    >
+                                      {
+                                        subtask.text
+                                      }
+                                    </span>
+                                  </div>
+                                )
+                              )}
+                            </div>
                           )}
-                        </div>
-                      )}
-                    </article>
-                  ))
+                        </article>
+                      );
+                    }
+                  )
                 )}
               </div>
             </div>

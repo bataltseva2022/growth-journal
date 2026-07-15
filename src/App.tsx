@@ -129,6 +129,7 @@ export default function App() {
     tasks,
     addTask,
     editTask,
+    reorderTasks,
     updateTaskTime,
     clearTaskTime,
     toggleTask,
@@ -175,9 +176,7 @@ export default function App() {
   }, [activeTab]);
 
   const selectedDateTasks =
-    getTasksByDate(
-      selectedDate
-    );
+    getTasksByDate(selectedDate);
 
   const selectedReflection =
     getReflectionByDate(
@@ -307,9 +306,7 @@ export default function App() {
             dayIcon={
               currentTheme.dayIcon
             }
-            taskText={
-              taskText
-            }
+            taskText={taskText}
             onTaskTextChange={
               setTaskText
             }
@@ -319,9 +316,7 @@ export default function App() {
             tasks={
               selectedDateTasks
             }
-            projects={
-              projects
-            }
+            projects={projects}
             topics={topics}
             selectedProjectId={
               selectedProjectId
@@ -338,8 +333,9 @@ export default function App() {
             onToggle={
               handleToggleTask
             }
-            onEditTask={
-              editTask
+            onEditTask={editTask}
+            onReorderTasks={
+              reorderTasks
             }
             onUpdateTaskTime={
               updateTaskTime
@@ -347,9 +343,7 @@ export default function App() {
             onClearTaskTime={
               clearTaskTime
             }
-            onDelete={
-              deleteTask
-            }
+            onDelete={deleteTask}
             onToggleExpand={
               toggleExpand
             }
@@ -400,30 +394,6 @@ export default function App() {
           sm:p-6
         "
       >
-        <div className="mb-5">
-          <h2
-            className="
-              text-2xl
-              font-bold
-              text-gray-800
-            "
-          >
-            📋 План на неделю
-          </h2>
-
-          <p
-            className="
-              mt-1
-              text-sm
-              text-gray-500
-            "
-          >
-            Перетаскивай задачи
-            между днями и следи
-            за прогрессом недели
-          </p>
-        </div>
-
         <WeekBoard
           tasks={tasks}
           selectedDate={
@@ -432,8 +402,9 @@ export default function App() {
           dayIcon={
             currentTheme.dayIcon
           }
-          onMoveTask={
-            moveTask
+          onMoveTask={moveTask}
+          onReorderTasks={
+            reorderTasks
           }
         />
       </section>
@@ -472,9 +443,8 @@ export default function App() {
               text-gray-500
             "
           >
-            Выбери день, чтобы
-            посмотреть его задачи
-            и статистику
+            Выбери день, чтобы посмотреть
+            его задачи и статистику
           </p>
         </div>
 
@@ -540,12 +510,11 @@ export default function App() {
                   text-gray-500
                 "
               >
-                После выбора даты
-                перейди во вкладку
-                «Сегодня», чтобы
-                добавить или
-                отредактировать
-                задачи этого дня.
+                После выбора даты перейди
+                во вкладку «Сегодня»,
+                чтобы добавить или
+                отредактировать задачи
+                этого дня.
               </p>
 
               <button
@@ -608,16 +577,14 @@ export default function App() {
               text-gray-500
             "
           >
-            Создавай категории,
-            чтобы разделять рабочие,
-            личные и другие задачи
+            Создавай категории, чтобы
+            разделять рабочие, личные и
+            другие задачи
           </p>
         </div>
 
         <OrganizationPanel
-          projects={
-            projects
-          }
+          projects={projects}
           topics={topics}
           onAddProject={
             addProject
@@ -625,9 +592,7 @@ export default function App() {
           onDeleteProject={
             handleDeleteProject
           }
-          onAddTopic={
-            addTopic
-          }
+          onAddTopic={addTopic}
           onDeleteTopic={
             handleDeleteTopic
           }
@@ -666,9 +631,7 @@ export default function App() {
                 value
               )
             }
-            onMoodChange={(
-              mood
-            ) =>
+            onMoodChange={(mood) =>
               setReflectionMood(
                 selectedDate,
                 mood
@@ -724,10 +687,9 @@ export default function App() {
                   text-gray-500
                 "
               >
-                Выбирай дату в
-                календаре и сохраняй
-                настроение, успехи,
-                сложности и мысли
+                Выбирай дату в календаре
+                и сохраняй настроение,
+                успехи, сложности и мысли
                 об улучшениях.
               </p>
             </div>
@@ -766,9 +728,9 @@ export default function App() {
               text-gray-500
             "
           >
-            Выбирай оформление,
-            питомца и сохраняй
-            резервные копии данных
+            Выбирай оформление, питомца
+            и сохраняй резервные копии
+            данных
           </p>
         </div>
 
@@ -802,17 +764,13 @@ export default function App() {
               "
             >
               Текущая тема:{" "}
-              {
-                currentTheme.name
-              }
+              {currentTheme.name}
             </p>
           </div>
 
           <ThemeSwitcher
             theme={theme}
-            onThemeChange={
-              setTheme
-            }
+            onThemeChange={setTheme}
           />
         </section>
 
@@ -915,10 +873,8 @@ export default function App() {
                 text-gray-800
               "
             >
-              {
-                currentTheme.emoji
-              }{" "}
-              Мой планировщик
+              {currentTheme.emoji} Мой
+              планировщик
             </h1>
 
             <p
@@ -929,10 +885,9 @@ export default function App() {
                 text-gray-500
               "
             >
-              Планируй задачи,
-              наблюдай за прогрессом
-              и сохраняй мысли о
-              каждом дне
+              Планируй задачи, наблюдай за
+              прогрессом и сохраняй мысли
+              о каждом дне
             </p>
           </div>
 
@@ -949,22 +904,14 @@ export default function App() {
               shadow-sm
             "
           >
-            {
-              currentTheme.emoji
-            }{" "}
-            {
-              currentTheme.name
-            }
+            {currentTheme.emoji}{" "}
+            {currentTheme.name}
           </div>
         </header>
 
         <AppNavigation
-          activeTab={
-            activeTab
-          }
-          onTabChange={
-            setActiveTab
-          }
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
         />
 
         <div

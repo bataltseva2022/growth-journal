@@ -58,6 +58,11 @@ type Props = {
     text: string
   ) => void;
 
+  onReorderTasks: (
+    firstTaskId: number,
+    secondTaskId: number
+  ) => void;
+
   onUpdateTaskTime: (
     taskId: number,
     field: TaskTimeField,
@@ -125,6 +130,7 @@ export default function TaskPanel({
   onTopicChange,
   onToggle,
   onEditTask,
+  onReorderTasks,
   onUpdateTaskTime,
   onClearTaskTime,
   onDelete,
@@ -152,9 +158,8 @@ export default function TaskPanel({
       "all"
     );
 
-  const date = parseDate(
-    selectedDate
-  );
+  const date =
+    parseDate(selectedDate);
 
   const title =
     date.toLocaleDateString(
@@ -199,17 +204,14 @@ export default function TaskPanel({
             "none"
           ) {
             matchesTopic =
-              task.topicId ===
-              null;
+              task.topicId === null;
           } else if (
             topicFilter !==
             "all"
           ) {
             matchesTopic =
               task.topicId ===
-              Number(
-                topicFilter
-              );
+              Number(topicFilter);
           }
 
           let matchesStatus =
@@ -276,8 +278,7 @@ export default function TaskPanel({
                 );
 
           const topicKey =
-            task.topicId ===
-            null
+            task.topicId === null
               ? "no-topic"
               : String(
                   task.topicId
@@ -353,9 +354,7 @@ export default function TaskPanel({
   function handleInputKeyDown(
     event: KeyboardEvent<HTMLInputElement>
   ) {
-    if (
-      event.key === "Enter"
-    ) {
+    if (event.key === "Enter") {
       event.preventDefault();
       onAddTask();
     }
@@ -526,12 +525,8 @@ export default function TaskPanel({
               {projects.map(
                 (project) => (
                   <option
-                    key={
-                      project.id
-                    }
-                    value={
-                      project.id
-                    }
+                    key={project.id}
+                    value={project.id}
                   >
                     {project.name}
                   </option>
@@ -609,9 +604,7 @@ export default function TaskPanel({
         projectFilter={
           projectFilter
         }
-        topicFilter={
-          topicFilter
-        }
+        topicFilter={topicFilter}
         statusFilter={
           statusFilter
         }
@@ -713,9 +706,7 @@ export default function TaskPanel({
 
             <button
               type="button"
-              onClick={
-                resetFilters
-              }
+              onClick={resetFilters}
               className="
                 mt-3
                 rounded-xl
@@ -824,42 +815,155 @@ export default function TaskPanel({
                   "
                 >
                   {group.tasks.map(
-                    (task) => (
-                      <TaskItem
-                        key={task.id}
-                        task={task}
-                        onToggle={
-                          onToggle
-                        }
-                        onEditTask={
-                          onEditTask
-                        }
-                        onUpdateTaskTime={
-                          onUpdateTaskTime
-                        }
-                        onClearTaskTime={
-                          onClearTaskTime
-                        }
-                        onDelete={
-                          onDelete
-                        }
-                        onToggleExpand={
-                          onToggleExpand
-                        }
-                        onToggleSubtask={
-                          onToggleSubtask
-                        }
-                        onEditSubtask={
-                          onEditSubtask
-                        }
-                        onDeleteSubtask={
-                          onDeleteSubtask
-                        }
-                        onAddSubtask={
-                          onAddSubtask
-                        }
-                      />
-                    )
+                    (
+                      task,
+                      taskIndex
+                    ) => {
+                      const previousTask =
+                        group.tasks[
+                          taskIndex - 1
+                        ] ?? null;
+
+                      const nextTask =
+                        group.tasks[
+                          taskIndex + 1
+                        ] ?? null;
+
+                      return (
+                        <div
+                          key={task.id}
+                          className="
+                            grid
+                            grid-cols-[36px_minmax(0,1fr)]
+                            items-start
+                            gap-2
+                          "
+                        >
+                          <div
+                            className="
+                              flex
+                              flex-col
+                              gap-1
+                              pt-2
+                            "
+                          >
+                            <button
+                              type="button"
+                              disabled={
+                                previousTask ===
+                                null
+                              }
+                              onClick={() => {
+                                if (
+                                  previousTask
+                                ) {
+                                  onReorderTasks(
+                                    task.id,
+                                    previousTask.id
+                                  );
+                                }
+                              }}
+                              className="
+                                flex
+                                h-8
+                                w-8
+                                items-center
+                                justify-center
+                                rounded-lg
+                                bg-white/75
+                                text-sm
+                                font-bold
+                                text-gray-500
+                                shadow-sm
+                                transition
+                                hover:bg-pink-50
+                                hover:text-pink-600
+                                disabled:cursor-not-allowed
+                                disabled:opacity-25
+                              "
+                              aria-label="Переместить задачу выше"
+                              title="Переместить выше"
+                            >
+                              ↑
+                            </button>
+
+                            <button
+                              type="button"
+                              disabled={
+                                nextTask ===
+                                null
+                              }
+                              onClick={() => {
+                                if (
+                                  nextTask
+                                ) {
+                                  onReorderTasks(
+                                    task.id,
+                                    nextTask.id
+                                  );
+                                }
+                              }}
+                              className="
+                                flex
+                                h-8
+                                w-8
+                                items-center
+                                justify-center
+                                rounded-lg
+                                bg-white/75
+                                text-sm
+                                font-bold
+                                text-gray-500
+                                shadow-sm
+                                transition
+                                hover:bg-pink-50
+                                hover:text-pink-600
+                                disabled:cursor-not-allowed
+                                disabled:opacity-25
+                              "
+                              aria-label="Переместить задачу ниже"
+                              title="Переместить ниже"
+                            >
+                              ↓
+                            </button>
+                          </div>
+
+                          <TaskItem
+                            task={task}
+                            onToggle={
+                              onToggle
+                            }
+                            onEditTask={
+                              onEditTask
+                            }
+                            onUpdateTaskTime={
+                              onUpdateTaskTime
+                            }
+                            onClearTaskTime={
+                              onClearTaskTime
+                            }
+                            onDelete={
+                              onDelete
+                            }
+                            onToggleExpand={
+                              onToggleExpand
+                            }
+                            onToggleSubtask={
+                              onToggleSubtask
+                            }
+                            onEditSubtask={
+                              onEditSubtask
+                            }
+                            onDeleteSubtask={
+                              onDeleteSubtask
+                            }
+                            onAddSubtask={
+                              onAddSubtask
+                            }
+                          />
+                        </div>
+                      );
+                    }
                   )}
                 </div>
               </section>
