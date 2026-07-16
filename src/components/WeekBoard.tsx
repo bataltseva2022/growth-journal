@@ -1,5 +1,6 @@
 import {
   useMemo,
+  useState,
   type DragEvent,
   type PointerEvent,
 } from "react";
@@ -28,7 +29,94 @@ type Props = {
     firstTaskId: number,
     secondTaskId: number
   ) => void;
+
+  onOpenTask: (
+    date: string
+  ) => void;
 };
+
+function timeToMinutes(
+  time: string
+): number {
+  const [hours, minutes] =
+    time.split(":").map(Number);
+
+  return hours * 60 + minutes;
+}
+
+function calculateDuration(
+  startedAt: string | null,
+  finishedAt: string | null
+): number | null {
+  if (!startedAt || !finishedAt) {
+    return null;
+  }
+
+  const startMinutes =
+    timeToMinutes(startedAt);
+
+  const finishMinutes =
+    timeToMinutes(finishedAt);
+
+  let difference =
+    finishMinutes - startMinutes;
+
+  if (difference < 0) {
+    difference += 24 * 60;
+  }
+
+  return difference;
+}
+
+function formatDuration(
+  minutes: number
+): string {
+  if (minutes < 60) {
+    return `${minutes} мин`;
+  }
+
+  const hours =
+    Math.floor(minutes / 60);
+
+  const remainingMinutes =
+    minutes % 60;
+
+  if (remainingMinutes === 0) {
+    return `${hours} ч`;
+  }
+
+  return `${hours} ч ${remainingMinutes} мин`;
+}
+
+function getTimeSummary(
+  task: Task
+): string | null {
+  const duration =
+    calculateDuration(
+      task.startedAt,
+      task.finishedAt
+    );
+
+  if (
+    task.startedAt &&
+    task.finishedAt &&
+    duration !== null
+  ) {
+    return `${task.startedAt}–${task.finishedAt} · ${formatDuration(
+      duration
+    )}`;
+  }
+
+  if (task.startedAt) {
+    return `С ${task.startedAt}`;
+  }
+
+  if (task.finishedAt) {
+    return `До ${task.finishedAt}`;
+  }
+
+  return null;
+}
 
 export default function WeekBoard({
   tasks,
@@ -36,7 +124,15 @@ export default function WeekBoard({
   dayIcon,
   onMoveTask,
   onReorderTasks,
+  onOpenTask,
 }: Props) {
+  const [
+    noteTask,
+    setNoteTask,
+  ] = useState<Task | null>(
+    null
+  );
+
   const today = getToday();
 
   const weekDays = useMemo(
@@ -95,6 +191,13 @@ export default function WeekBoard({
     event.stopPropagation();
   }
 
+  function openTask(
+    date: string
+  ) {
+    setNoteTask(null);
+    onOpenTask(date);
+  }
+
   return (
     <div>
       <div
@@ -127,8 +230,8 @@ export default function WeekBoard({
             "
           >
             Перетаскивай задачи между
-            днями или меняй их порядок
-            кнопками
+            днями, меняй их порядок или
+            открывай подробности
           </p>
         </div>
 
@@ -342,6 +445,15 @@ export default function WeekBoard({
                           taskIndex + 1
                         ] ?? null;
 
+                      const timeSummary =
+                        getTimeSummary(
+                          task
+                        );
+
+                      const hasNote =
+                        task.note.trim()
+                          .length > 0;
+
                       return (
                         <article
                           key={task.id}
@@ -518,6 +630,115 @@ export default function WeekBoard({
                             </div>
                           </div>
 
+                          <div
+                            className="
+                              mt-2
+                              flex
+                              flex-wrap
+                              gap-1
+                              border-t
+                              border-black/5
+                              pt-2
+                            "
+                          >
+                            <button
+                              type="button"
+                              draggable={
+                                false
+                              }
+                              onPointerDown={
+                                stopTaskDrag
+                              }
+                              onClick={(
+                                event
+                              ) => {
+                                event.stopPropagation();
+
+                                openTask(
+                                  task.date
+                                );
+                              }}
+                              className="
+                                rounded-md
+                                bg-white/75
+                                px-2
+                                py-1
+                                text-[10px]
+                                font-semibold
+                                text-pink-600
+                                shadow-sm
+                                transition
+                                hover:bg-white
+                                hover:text-pink-700
+                              "
+                              aria-label="Открыть задачу во вкладке Сегодня"
+                              title="Открыть задачу во вкладке Сегодня"
+                            >
+                              ↗ Открыть
+                            </button>
+
+                            {hasNote && (
+                              <button
+                                type="button"
+                                draggable={
+                                  false
+                                }
+                                onPointerDown={
+                                  stopTaskDrag
+                                }
+                                onClick={(
+                                  event
+                                ) => {
+                                  event.stopPropagation();
+
+                                  setNoteTask(
+                                    task
+                                  );
+                                }}
+                                className="
+                                  rounded-md
+                                  bg-amber-50
+                                  px-2
+                                  py-1
+                                  text-[10px]
+                                  font-semibold
+                                  text-amber-700
+                                  shadow-sm
+                                  transition
+                                  hover:bg-amber-100
+                                "
+                                aria-label="Открыть заметку"
+                                title="Открыть заметку"
+                              >
+                                📝 Заметка
+                              </button>
+                            )}
+                          </div>
+
+                          {timeSummary && (
+                            <div
+                              className="
+                                mt-2
+                              "
+                            >
+                              <span
+                                className="
+                                  inline-block
+                                  rounded-md
+                                  bg-violet-50
+                                  px-2
+                                  py-1
+                                  text-[10px]
+                                  font-medium
+                                  text-violet-600
+                                "
+                              >
+                                ⏱{" "}
+                                {timeSummary}
+                              </span>
+                            </div>
+                          )}
+
                           {task.subtasks
                             .length > 0 && (
                             <div
@@ -592,6 +813,178 @@ export default function WeekBoard({
           );
         })}
       </div>
+
+      {noteTask && (
+        <div
+          className="
+            fixed
+            inset-0
+            z-[120]
+            flex
+            items-center
+            justify-center
+            bg-black/25
+            p-4
+            backdrop-blur-[2px]
+          "
+          onClick={() =>
+            setNoteTask(null)
+          }
+        >
+          <div
+            className="
+              w-full
+              max-w-lg
+              rounded-3xl
+              border
+              border-white/80
+              bg-white
+              p-5
+              shadow-2xl
+            "
+            onClick={(event) =>
+              event.stopPropagation()
+            }
+          >
+            <div
+              className="
+                mb-4
+                flex
+                items-start
+                justify-between
+                gap-3
+              "
+            >
+              <div
+                className="
+                  min-w-0
+                "
+              >
+                <h3
+                  className="
+                    text-lg
+                    font-bold
+                    text-gray-800
+                  "
+                >
+                  📝 Заметка к задаче
+                </h3>
+
+                <p
+                  className="
+                    mt-1
+                    break-words
+                    text-sm
+                    font-medium
+                    text-gray-500
+                  "
+                >
+                  {noteTask.text}
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() =>
+                  setNoteTask(null)
+                }
+                className="
+                  flex
+                  h-8
+                  w-8
+                  shrink-0
+                  items-center
+                  justify-center
+                  rounded-full
+                  bg-gray-100
+                  text-gray-500
+                  transition
+                  hover:bg-gray-200
+                  hover:text-gray-800
+                "
+                aria-label="Закрыть заметку"
+                title="Закрыть"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div
+              className="
+                max-h-[50vh]
+                overflow-y-auto
+                whitespace-pre-wrap
+                break-words
+                rounded-2xl
+                border
+                border-amber-100
+                bg-amber-50/50
+                px-4
+                py-4
+                text-sm
+                leading-6
+                text-gray-700
+              "
+            >
+              {noteTask.note}
+            </div>
+
+            <div
+              className="
+                mt-5
+                flex
+                flex-col-reverse
+                gap-2
+                sm:flex-row
+                sm:justify-end
+              "
+            >
+              <button
+                type="button"
+                onClick={() =>
+                  setNoteTask(null)
+                }
+                className="
+                  rounded-xl
+                  bg-gray-100
+                  px-4
+                  py-2.5
+                  text-sm
+                  font-medium
+                  text-gray-600
+                  transition
+                  hover:bg-gray-200
+                "
+              >
+                Закрыть
+              </button>
+
+              <button
+                type="button"
+                onClick={() =>
+                  openTask(
+                    noteTask.date
+                  )
+                }
+                className="
+                  rounded-xl
+                  bg-pink-500
+                  px-4
+                  py-2.5
+                  text-sm
+                  font-semibold
+                  text-white
+                  transition
+                  hover:bg-pink-600
+                  active:scale-95
+                "
+              >
+                Открыть задачу
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -76,10 +76,9 @@ export default function App() {
   const [
     activeTab,
     setActiveTab,
-  ] =
-    useState<AppTab>(
-      getInitialTab
-    );
+  ] = useState<AppTab>(
+    getInitialTab
+  );
 
   const [
     selectedDate,
@@ -129,6 +128,7 @@ export default function App() {
     tasks,
     addTask,
     editTask,
+    updateTaskNote,
     reorderTasks,
     updateTaskTime,
     clearTaskTime,
@@ -242,6 +242,18 @@ export default function App() {
     toggleTask(taskId);
   }
 
+  function handleOpenTaskFromWeek(
+    date: string
+  ) {
+    setSelectedDate(date);
+    setActiveTab("today");
+
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  }
+
   function handleDeleteProject(
     projectId: number
   ) {
@@ -334,6 +346,9 @@ export default function App() {
               handleToggleTask
             }
             onEditTask={editTask}
+            onUpdateTaskNote={
+              updateTaskNote
+            }
             onReorderTasks={
               reorderTasks
             }
@@ -405,6 +420,9 @@ export default function App() {
           onMoveTask={moveTask}
           onReorderTasks={
             reorderTasks
+          }
+          onOpenTask={
+            handleOpenTaskFromWeek
           }
         />
       </section>

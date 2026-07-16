@@ -58,6 +58,11 @@ type Props = {
     text: string
   ) => void;
 
+  onUpdateTaskNote: (
+    taskId: number,
+    note: string
+  ) => void;
+
   onReorderTasks: (
     firstTaskId: number,
     secondTaskId: number
@@ -130,6 +135,7 @@ export default function TaskPanel({
   onTopicChange,
   onToggle,
   onEditTask,
+  onUpdateTaskNote,
   onReorderTasks,
   onUpdateTaskTime,
   onClearTaskTime,
@@ -935,6 +941,9 @@ export default function TaskPanel({
                             }
                             onEditTask={
                               onEditTask
+                            }
+                            onUpdateTaskNote={
+                              onUpdateTaskNote
                             }
                             onUpdateTaskTime={
                               onUpdateTaskTime

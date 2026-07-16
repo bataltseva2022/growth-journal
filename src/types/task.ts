@@ -18,6 +18,8 @@ export type Task = {
   projectId: number | null;
   topicId: number | null;
 
+  note: string;
+
   startedAt: string | null;
   finishedAt: string | null;
 };

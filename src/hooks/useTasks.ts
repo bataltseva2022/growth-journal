@@ -72,6 +72,11 @@ function loadTasks(): Task[] {
             ? savedTask.topicId
             : null,
 
+        note:
+          typeof savedTask.note === "string"
+            ? savedTask.note
+            : "",
+
         startedAt:
           typeof savedTask.startedAt ===
           "string"
@@ -152,6 +157,7 @@ export default function useTasks() {
       subtasks: [],
       projectId,
       topicId,
+      note: "",
       startedAt: null,
       finishedAt: null,
     };
@@ -179,6 +185,25 @@ export default function useTasks() {
           ? {
               ...task,
               text: trimmedText,
+            }
+          : task
+      )
+    );
+  }
+
+  function updateTaskNote(
+    taskId: number,
+    note: string
+  ) {
+    const normalizedNote =
+      note.trim();
+
+    setTasks((currentTasks) =>
+      currentTasks.map((task) =>
+        task.id === taskId
+          ? {
+              ...task,
+              note: normalizedNote,
             }
           : task
       )
@@ -538,6 +563,7 @@ export default function useTasks() {
     tasks,
     addTask,
     editTask,
+    updateTaskNote,
     reorderTasks,
     updateTaskTime,
     clearTaskTime,
