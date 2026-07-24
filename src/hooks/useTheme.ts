@@ -16,7 +16,8 @@ export type ThemeId =
   | "forest"
   | "sky"
   | "sunset"
-  | "minimal";
+  | "minimal"
+  | "fantasy";
 
 export type ThemeOption = {
   id: ThemeId;
@@ -57,6 +58,7 @@ const allowedThemeIds: ThemeId[] = [
   "sky",
   "sunset",
   "minimal",
+  "fantasy",
 ];
 
 const commonSuccessVariables = {
@@ -423,6 +425,69 @@ const themeConfigs: ThemeConfig[] = [
       ...commonSuccessVariables,
     },
   },
+  {
+    id: "fantasy",
+    name: "Магическая лавка",
+    emoji: "🦉",
+    dayIcon: "🔮",
+    calendarIcon: "📜",
+    taskMarkerIcon: "🧪",
+
+    previewStyle: {
+      backgroundColor: "#f4ead7",
+      backgroundImage:
+        "radial-gradient(circle at 18% 22%, rgba(111, 132, 61, 0.55) 0, transparent 24%), radial-gradient(circle at 82% 72%, rgba(98, 69, 112, 0.48) 0, transparent 28%), linear-gradient(135deg, #d8bf91 0%, #f4ead7 48%, #c7a7bd 100%)",
+      backgroundSize: "cover",
+      backgroundPosition: "center",
+    },
+
+    backgroundStyle: {
+      backgroundColor: "#efe3cf",
+      backgroundImage:
+        "radial-gradient(circle at 12% 18%, rgba(101, 121, 52, 0.24) 0, transparent 25%), radial-gradient(circle at 88% 15%, rgba(102, 72, 116, 0.24) 0, transparent 26%), radial-gradient(circle at 82% 82%, rgba(174, 118, 79, 0.20) 0, transparent 30%), linear-gradient(135deg, #e5cfaa 0%, #f6eddf 45%, #d8c0d3 100%)",
+      backgroundRepeat: "no-repeat",
+      backgroundAttachment: "fixed",
+      backgroundSize: "cover",
+      backgroundPosition: "center",
+    },
+
+    variables: {
+      "--accent": "#6d4f78",
+      "--accent-hover": "#553c60",
+      "--accent-light": "#90709a",
+      "--accent-soft": "#f4eef6",
+      "--accent-soft-strong": "#e7dce9",
+      "--accent-border": "#bea9c4",
+      "--accent-ring":
+        "rgba(109, 79, 120, 0.24)",
+
+      "--secondary": "#70823d",
+      "--secondary-hover": "#59682f",
+      "--secondary-light": "#93a85b",
+      "--secondary-soft": "#f2f5e8",
+      "--secondary-soft-strong": "#e4ead1",
+      "--secondary-border": "#bdca91",
+      "--secondary-ring":
+        "rgba(112, 130, 61, 0.22)",
+
+      "--surface-main":
+        "rgba(246, 237, 223, 0.91)",
+      "--surface-card":
+        "rgba(255, 249, 237, 0.86)",
+      "--surface-strong":
+        "rgba(255, 251, 243, 0.96)",
+      "--surface-muted":
+        "rgba(244, 232, 211, 0.78)",
+      "--surface-border":
+        "rgba(126, 88, 55, 0.36)",
+
+      "--text-primary": "#3f3028",
+      "--text-muted": "#75645b",
+
+      ...commonSuccessVariables,
+    },
+  },
+
 ];
 
 export const themeOptions: ThemeOption[] =

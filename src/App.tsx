@@ -289,6 +289,7 @@ export default function App() {
                   onToggleTask={
                     handleToggleTask
                   }
+                  theme={theme}
                   pomodoroMode={
                     pomodoroMode
                   }

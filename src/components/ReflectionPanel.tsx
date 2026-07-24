@@ -1,9 +1,11 @@
 import type { ThemeId } from "../hooks/useTheme";
+
 import type {
   Mood,
   Reflection,
   ReflectionField,
 } from "../types/reflection";
+
 import { parseDate } from "../utils/date";
 
 type Props = {
@@ -113,6 +115,14 @@ const reflectionIcons: Record<
     improvements: "✏️",
     gratitude: "🤍",
   },
+
+  fantasy: {
+    header: "🦉",
+    wins: "✨",
+    difficulties: "🌫️",
+    improvements: "🧪",
+    gratitude: "🔮",
+  },
 };
 
 export default function ReflectionPanel({
@@ -124,15 +134,20 @@ export default function ReflectionPanel({
   onClear,
 }: Props) {
   const date = parseDate(selectedDate);
-  const icons = reflectionIcons[theme];
+
+  const icons =
+    reflectionIcons[theme];
 
   const formattedDate =
-    date.toLocaleDateString("ru-RU", {
-      weekday: "long",
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-    });
+    date.toLocaleDateString(
+      "ru-RU",
+      {
+        weekday: "long",
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      }
+    );
 
   const hasReflection =
     reflection.wins.trim() !== "" ||
@@ -142,9 +157,10 @@ export default function ReflectionPanel({
     reflection.mood !== null;
 
   function handleClear() {
-    const confirmed = window.confirm(
-      "Очистить рефлексию за выбранный день?"
-    );
+    const confirmed =
+      window.confirm(
+        "Очистить рефлексию за выбранный день?"
+      );
 
     if (confirmed) {
       onClear();
@@ -174,11 +190,24 @@ export default function ReflectionPanel({
         "
       >
         <div>
-          <h2 className="text-2xl font-bold text-gray-800">
+          <h2
+            className="
+              text-2xl
+              font-bold
+              text-gray-800
+            "
+          >
             {icons.header} Рефлексия дня
           </h2>
 
-          <p className="mt-1 capitalize text-sm text-gray-500">
+          <p
+            className="
+              mt-1
+              capitalize
+              text-sm
+              text-gray-500
+            "
+          >
             {formattedDate}
           </p>
         </div>
@@ -209,72 +238,98 @@ export default function ReflectionPanel({
       </div>
 
       <div className="mb-7">
-        <h3 className="mb-3 font-semibold text-gray-700">
+        <h3
+          className="
+            mb-3
+            font-semibold
+            text-gray-700
+          "
+        >
           Как прошло настроение дня?
         </h3>
 
         <div className="flex flex-wrap gap-3">
-          {moodOptions.map((option) => {
-            const isSelected =
-              reflection.mood === option.value;
+          {moodOptions.map(
+            (option) => {
+              const isSelected =
+                reflection.mood ===
+                option.value;
 
-            return (
-              <button
-                key={option.value}
-                type="button"
-                onClick={() =>
-                  onMoodChange(
-                    isSelected
-                      ? null
-                      : option.value
-                  )
-                }
-                className={`
-                  flex
-                  min-w-[82px]
-                  flex-col
-                  items-center
-                  gap-1
-                  rounded-2xl
-                  border
-                  px-3
-                  py-3
-                  transition
-                  ${
-                    isSelected
-                      ? "border-pink-400 bg-pink-100 shadow-sm"
-                      : "border-gray-200 bg-white/70 hover:border-pink-200 hover:bg-pink-50"
+              return (
+                <button
+                  key={option.value}
+                  type="button"
+                  onClick={() =>
+                    onMoodChange(
+                      isSelected
+                        ? null
+                        : option.value
+                    )
                   }
-                `}
-                title={option.label}
-              >
-                <span className="text-3xl">
-                  {option.emoji}
-                </span>
+                  className={`
+                    flex
+                    min-w-[82px]
+                    flex-col
+                    items-center
+                    gap-1
+                    rounded-2xl
+                    border
+                    px-3
+                    py-3
+                    transition
+                    ${
+                      isSelected
+                        ? "border-pink-400 bg-pink-100 shadow-sm"
+                        : "border-gray-200 bg-white/70 hover:border-pink-200 hover:bg-pink-50"
+                    }
+                  `}
+                  title={option.label}
+                >
+                  <span className="text-3xl">
+                    {option.emoji}
+                  </span>
 
-                <span className="text-xs text-gray-500">
-                  {option.label}
-                </span>
-              </button>
-            );
-          })}
+                  <span
+                    className="
+                      text-xs
+                      text-gray-500
+                    "
+                  >
+                    {option.label}
+                  </span>
+                </button>
+              );
+            }
+          )}
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
+      <div
+        className="
+          grid
+          grid-cols-1
+          gap-5
+          lg:grid-cols-2
+        "
+      >
         <ReflectionTextarea
           title={`${icons.wins} Что получилось?`}
           placeholder="Запиши всё, что сегодня получилось хорошо..."
           value={reflection.wins}
           onChange={(value) =>
-            onFieldChange("wins", value)
+            onFieldChange(
+              "wins",
+              value
+            )
           }
         />
 
         <ReflectionTextarea
           title={`${icons.difficulties} Что было сложно?`}
           placeholder="Что вызвало трудности, усталость или сопротивление?"
-          value={reflection.difficulties}
+          value={
+            reflection.difficulties
+          }
           onChange={(value) =>
             onFieldChange(
               "difficulties",
@@ -286,7 +341,9 @@ export default function ReflectionPanel({
         <ReflectionTextarea
           title={`${icons.improvements} Что можно улучшить?`}
           placeholder="Что завтра можно сделать немного иначе?"
-          value={reflection.improvements}
+          value={
+            reflection.improvements
+          }
           onChange={(value) =>
             onFieldChange(
               "improvements",
@@ -298,7 +355,9 @@ export default function ReflectionPanel({
         <ReflectionTextarea
           title={`${icons.gratitude} За что я благодарна?`}
           placeholder="Люди, события или маленькие приятные моменты..."
-          value={reflection.gratitude}
+          value={
+            reflection.gratitude
+          }
           onChange={(value) =>
             onFieldChange(
               "gratitude",
@@ -308,7 +367,13 @@ export default function ReflectionPanel({
         />
       </div>
 
-      <p className="mt-5 text-xs text-gray-400">
+      <p
+        className="
+          mt-5
+          text-xs
+          text-gray-400
+        "
+      >
         Изменения сохраняются автоматически
       </p>
     </div>
@@ -319,7 +384,9 @@ type ReflectionTextareaProps = {
   title: string;
   placeholder: string;
   value: string;
-  onChange: (value: string) => void;
+  onChange: (
+    value: string
+  ) => void;
 };
 
 function ReflectionTextarea({
@@ -330,7 +397,14 @@ function ReflectionTextarea({
 }: ReflectionTextareaProps) {
   return (
     <label className="block">
-      <span className="mb-2 block font-semibold text-gray-700">
+      <span
+        className="
+          mb-2
+          block
+          font-semibold
+          text-gray-700
+        "
+      >
         {title}
       </span>
 
@@ -356,7 +430,9 @@ function ReflectionTextarea({
         placeholder={placeholder}
         value={value}
         onChange={(event) =>
-          onChange(event.target.value)
+          onChange(
+            event.target.value
+          )
         }
       />
     </label>
